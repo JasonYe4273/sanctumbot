@@ -244,6 +244,9 @@ async def submitdeck(interaction: discord.Interaction, tid: int, decklist: str):
 
 
 
+
+HANDLING = dict()  # type: ignore[var-annotated]
+
 @tree.command(  # type: ignore[arg-type]
     name="lfg",
     description="Join the 'looking for games' queue",
@@ -264,6 +267,20 @@ async def lfg(interaction: discord.Interaction, tid: int):
 
     if cur.execute(f"SELECT * FROM queue WHERE tid={tid} AND pid={pid}").fetchone():
         await send_error(interaction, f"You are already in the Looking For Games queue for {tournament}.")
+        return
+
+    for h in HANDLING:
+        if HANDLING[h]["p1"]["pid"] == pid or HANDLING[h]["p2"]["pid"] == pid:
+            await send_error(interaction, f"You are already in the process of being matched for {tournament}.")
+            return
+
+    if cur.execute(f"SELECT * FROM matches WHERE tid={tid} AND reported=0 AND (pid1={pid} OR pid2={pid})").fetchone():
+        await send_error(interaction, f"You are currently in an outstanding match for {tournament}. Please report that match result before re-joining the queue.")
+        return
+
+    MAX_MATCHES = 8
+    if len(cur.execute(f"SELECT * FROM matches WHERE tid={tid} AND (pid1={pid} OR pid2={pid})").fetchall()) >= MAX_MATCHES:
+        await send_error(interaction, f"You have already played the maximum number of matches for {tournament}.")
         return
 
     cur.execute("INSERT INTO queue VALUES (?, ?)", (tid, pid))
@@ -291,7 +308,6 @@ async def leave(interaction: discord.Interaction, tid: int):
         return
 
     queue_place = cur.execute(f"SELECT * FROM queue WHERE tid={tid} AND pid={pid}").fetchone()
-    print(queue_place)
     if not queue_place:
         await send_error(interaction, f"You are not in the Looking For Games queue for {tournament}.")
         return
@@ -309,95 +325,196 @@ async def leave(interaction: discord.Interaction, tid: int):
     description="Report a match result",
     guild=discord.Object(id=SANCTUM_ID)
 )
-async def report(interaction: discord.Interaction):
-    message_str = "Reporting! Implementation TBD."
-    await interaction.response.send_message(message_str, ephemeral=True)
+async def report(interaction: discord.Interaction, tid: int, wins: int, losses: int):
+    tournament = await _get_tournament(interaction, tid)
+    if not tournament:
+        return
+
+    pid = await _get_pid(interaction, tid)
+    if not pid:
+        return
+
+    match = cur.execute(f"SELECT rowid,pid1,pid2 FROM matches WHERE tid={tid} AND reported=0 AND (pid1={pid} OR pid2={pid})").fetchone()
+    if not match:
+        await send_error(interaction, f"You do not have any outstanding matches for this tournament.")
+
+    me_n = 1
+    you_n = 2
+    op_pid = match[2]
+    if match[2] == pid:
+        me_n = 2
+        you_n = 1
+        op_pid = match[1]
+
+    # TODO: result confirmations. for now things are locked once submitted. oh well.
+
+    cur.execute(f"UPDATE matches SET reported=1,wins{me_n}={wins},wins{you_n}={losses} WHERE rowid={match[0]}")
+    if wins > losses:
+        w = cur.execute(f"SELECT wins FROM players WHERE rowid={pid}").fetchone()[0]
+        cur.execute(f"UPDATE players SET wins={w+1} WHERE rowid={pid}")
+        l = cur.execute(f"SELECT losses FROM players WHERE rowid={op_pid}").fetchone()[0]
+        cur.execute(f"UPDATE players SET losses={l+1} WHERE rowid={op_pid}")
+    elif wins < losses:
+        w = cur.execute(f"SELECT wins FROM players WHERE rowid={op_pid}").fetchone()[0]
+        cur.execute(f"UPDATE players SET wins={w+1} WHERE rowid={op_pid}")
+        l = cur.execute(f"SELECT losses FROM players WHERE rowid={pid}").fetchone()[0]
+        cur.execute(f"UPDATE players SET losses={l+1} WHERE rowid={pid}")
+    else:
+        d1 = cur.execute(f"SELECT draws FROM players WHERE rowid={pid}").fetchone()[0]
+        cur.execute(f"UPDATE players SET draws={d1+1} WHERE rowid={pid}")
+        d2 = cur.execute(f"SELECT draws FROM players WHERE rowid={op_pid}").fetchone()[0]
+        cur.execute(f"UPDATE players SET draws={d2+1} WHERE rowid={op_pid}")
+    con.commit()
+
+    channel: discord.TextChannel = client.get_channel(cur.execute(f"SELECT channel FROM tournaments WHERE rowid={tid}").fetchone()[0])  # type: ignore[assignment]
+    tournament = cur.execute(f"SELECT name FROM tournaments WHERE rowid={tid}").fetchone()[0]
+    uid1 = cur.execute(f"SELECT uid FROM players WHERE rowid={pid}").fetchone()[0]
+    uid2 = cur.execute(f"SELECT uid FROM players WHERE rowid={op_pid}").fetchone()[0]
+    
+    message_str = f"""
+Match result reported:<@{uid1}> {wins}-{losses} <@{uid2}>.
+"""
+    message = await channel.send(message_str)
+
 
 
 ### MATCH LOGIC
 
-HANDLING = dict()
+def _find_matchable_pair(tid: int):
+    queue = cur.execute(f"SELECT pid FROM queue WHERE tid={tid}").fetchall()
+    if len(queue) < 2:
+        return False
+    for i in queue:
+        for j in queue:
+            if i[0] == j[0]:
+                continue
+            already_played = cur.execute(f"SELECT * FROM matches WHERE pid1={i[0]} AND pid2={j[0]}").fetchall()
+            already_played += cur.execute(f"SELECT * FROM matches WHERE pid1={j[0]} AND pid2={i[0]}").fetchall()
+
+            if len(already_played) == 0:
+                return (i[0], j[0])
 
 async def _try_assign_match(tid: int):
-    queue = cur.execute(f"SELECT pid FROM queue WHERE tid={tid}").fetchall()
-    if len(queue) >= 2:
-        pid1 = queue[0][0]
-        pid2 = queue[1][0]
+    # find a matchable pair
+    pair = _find_matchable_pair(tid)
+    if not pair:
+        return
 
-        print(pid1, pid2)
+    pid1 = pair[0]
+    pid2 = pair[1]
 
-        cur.execute(f"DELETE FROM queue WHERE tid={tid} AND pid={pid1}")
-        cur.execute(f"DELETE FROM queue WHERE tid={tid} AND pid={pid2}")
-        con.commit()
+    # remove them from the queue
+    cur.execute(f"DELETE FROM queue WHERE tid={tid} AND pid={pid1}")
+    cur.execute(f"DELETE FROM queue WHERE tid={tid} AND pid={pid2}")
+    con.commit()
 
+    # send message
+    channel: discord.TextChannel = client.get_channel(cur.execute(f"SELECT channel FROM tournaments WHERE rowid={tid}").fetchone()[0])  # type: ignore[assignment]
+    tournament = cur.execute(f"SELECT name FROM tournaments WHERE rowid={tid}").fetchone()[0]
+    uid1 = cur.execute(f"SELECT uid FROM players WHERE rowid={pid1}").fetchone()[0]
+    uid2 = cur.execute(f"SELECT uid FROM players WHERE rowid={pid2}").fetchone()[0]
 
-        channel: discord.TextChannel = client.get_channel(cur.execute(f"SELECT channel FROM tournaments WHERE rowid={tid}").fetchone()[0])  # type: ignore[assignment]
-        tournament = cur.execute(f"SELECT name FROM tournaments WHERE rowid={tid}").fetchone()[0]
-        uid1 = cur.execute(f"SELECT uid FROM players WHERE rowid={pid1}").fetchone()[0]
-        uid2 = cur.execute(f"SELECT uid FROM players WHERE rowid={pid2}").fetchone()[0]
-
-        message_str = f"""
+    message_str = f"""
 <@{uid1}> <@{uid2}> you have been matched in {tournament}!
 
 Please react to this message (with any reaction) to acknowledge that you're able to play your match.
 
 If one or both players have not reacted to this message within the next five minutes, the match will be cancelled, and those who reacted will be readded to the queue.
 """
-        message = await channel.send(message_str)
-        HANDLING[message.id] = {
-            "tid": tid,
-            "p1": {
-                "pid": pid1,
-                "uid": uid1,
-                "reacted": False
-            },
-            "p2": {
-                "pid": pid2,
-                "uid": uid2,
-                "reacted": False
-            }
+    message = await channel.send(message_str)
+    HANDLING[message.id] = {
+        "tid": tid,
+        "p1": {
+            "pid": pid1,
+            "uid": uid1,
+            "reacted": False
+        },
+        "p2": {
+            "pid": pid2,
+            "uid": uid2,
+            "reacted": False
         }
+    }
 
-        await asyncio.sleep(30)
+    # wait 5 minutes and then check if still handling this
+    await asyncio.sleep(30)
+    if message.id not in HANDLING:
+        return
 
-        if message.id in HANDLING:
-            h: dict = HANDLING[message.id]
-            del HANDLING[message.id]
+    # mark as not handling anymore
+    h: dict = HANDLING[message.id]
+    del HANDLING[message.id]
 
-            message_str = ""
-            if h["p1"]["reacted"] and h["p2"]["reacted"]:
-                await _create_match(tid, pid1, pid2)
-                await message.delete()
-                return
-            elif h["p1"]["reacted"]:
-                if not cur.execute(f"SELECT * FROM queue WHERE tid={tid} AND pid={pid1}").fetchone():
-                    cur.execute("INSERT INTO queue VALUES (?, ?)", (tid, pid1))
-                    con.commit()
+    message_str = ""
+    if h["p1"]["reacted"] and h["p2"]["reacted"]:
+        # if both have reacted create the match
+        await message.delete()
+        await _create_match(tid, pid1, pid2)
+        return
+    elif h["p1"]["reacted"]:
+        # if only p1 has reacted readd them and remove p2
+        if not cur.execute(f"SELECT * FROM queue WHERE tid={tid} AND pid={pid1}").fetchone():
+            cur.execute("INSERT INTO queue VALUES (?, ?)", (tid, pid1))
+            con.commit()
 
-                message_str = f"""
+        message_str = f"""
 <@{uid1}> you have been re-added to the queue for {tournament}.
 <@{uid2}> you have been removed from the queue.
 """
-            elif h["p2"]["reacted"]:
-                if not cur.execute(f"SELECT * FROM queue WHERE tid={tid} AND pid={pid2}").fetchone():
-                    cur.execute("INSERT INTO queue VALUES (?, ?)", (tid, pid2))
-                    con.commit()
+    elif h["p2"]["reacted"]:
+        # if only p2 has reacted readd them and remove p1
+        if not cur.execute(f"SELECT * FROM queue WHERE tid={tid} AND pid={pid2}").fetchone():
+            cur.execute("INSERT INTO queue VALUES (?, ?)", (tid, pid2))
+            con.commit()
 
-                message_str = f"""
+        message_str = f"""
 <@{uid2}> you have been re-added to the queue for {tournament}.
 <@{uid1}> you have been removed from the queue.
 """
-            else:
-                message_str = f"""
+    else:
+        # if neither has reacted remove both from the queue
+        message_str = f"""
 <@{uid1}> <@{uid2}> you have both been removed from the queue.
 """
 
-            await channel.send(message_str)
-            await message.delete()
+    # send the message and delete the original ping.
+    notif_message = await channel.send(message_str)
+    await message.delete()
+
+    # delete the message after 5 minutes
+    await asyncio.sleep(300)
+    await notif_message.delete()
 
 async def _create_match(tid: int, pid1: int, pid2: int):
-    print(f"creating match with {pid1} and {pid2} in {tid}!")
+    cur.execute("INSERT INTO matches VALUES (?, ?, ?, ?, ?, ?)",
+        (tid, pid1, pid2, 0, 0, 0))
+    con.commit()
 
+    channel: discord.TextChannel = client.get_channel(cur.execute(f"SELECT channel FROM tournaments WHERE rowid={tid}").fetchone()[0])  # type: ignore[assignment]
+    tournament = cur.execute(f"SELECT name FROM tournaments WHERE rowid={tid}").fetchone()[0]
+    p1 = cur.execute(f"SELECT uid,user,decklist FROM players WHERE rowid={pid1}").fetchone()
+    p2 = cur.execute(f"SELECT uid,user,decklist FROM players WHERE rowid={pid2}").fetchone()
+
+    message_str = f"""
+<@{p1[0]}> <@{p2[0]}> you may now start your match! Don't forget to use the /report command to report after you're done.
+
+Here are your opponent's decklists:
+[{p1[1]}](<{p1[2]}>)
+[{p2[1]}](<{p2[2]}>)
+"""
+    message = await channel.send(message_str)
+
+@tree.command(  # type: ignore[arg-type]
+    name="_try",
+    description="test",
+    guild=discord.Object(id=SANCTUM_ID)
+)
+async def tryqueue(interaction: discord.Interaction, tid: int):
+    tournament = await _get_tournament(interaction, tid)
+    if not tournament:
+        return
+
+    await _try_assign_match(tid)
 
 
 
