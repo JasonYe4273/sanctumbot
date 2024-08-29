@@ -221,7 +221,7 @@ async def drop(interaction: discord.Interaction, tid: int):
     if not pid:
         return
 
-    _set_db(f"UPDATE players SET dropped=TRUE WHERE pid={pid[0]}")
+    _set_db(f"UPDATE players SET dropped=TRUE WHERE pid={pid}")
 
     message_str = f"You have successfully been dropped from {tournament}."
     await interaction.response.send_message(message_str, ephemeral=True)
