@@ -112,7 +112,7 @@ async def get_players(interaction: discord.Interaction, tid: int, include_droppe
     if not tournament:
         return
 
-    query = f"SELECT pid,user,decklist,wins,losses,draws,dropped FROM players WHERE tid={tid}"
+    query = f"SELECT pid,username,decklist,wins,losses,draws,dropped FROM players WHERE tid={tid}"
     if not include_dropped:
         query += " AND NOT dropped"
     players = _get_all_db(query)
@@ -221,7 +221,7 @@ async def drop(interaction: discord.Interaction, tid: int):
     if not pid:
         return
 
-    set_db(f"UPDATE players SET dropped=TRUE WHERE pid={pid[0]}")
+    _set_db(f"UPDATE players SET dropped=TRUE WHERE pid={pid[0]}")
 
     message_str = f"You have successfully been dropped from {tournament}."
     await interaction.response.send_message(message_str, ephemeral=True)
@@ -234,7 +234,7 @@ async def drop(interaction: discord.Interaction, tid: int):
     guild=discord.Object(id=SANCTUM_ID)
 )
 async def registrations(interaction: discord.Interaction, include_dropped: bool):
-    registrations = _get_all_db(f"SELECT tid,name,decklist,wins,losses,draws,dropped FROM players INNER JOIN tournaments ON players.tid=tournaments.tid WHERE user='{str(interaction.user)}'")
+    registrations = _get_all_db(f"SELECT tid,name,decklist,wins,losses,draws,dropped FROM players INNER JOIN tournaments ON players.tid=tournaments.tid WHERE username='{str(interaction.user)}'")
 
     message_str = "Here's a list of all of your current active player registrations:\n"
     for p in registrations:
@@ -516,8 +516,8 @@ async def _create_match(tid: int, pid1: int, pid2: int):
 
     channel: discord.TextChannel = client.get_channel(_get_one_db(f"SELECT channel FROM tournaments WHERE tid={tid}")[0])  # type: ignore[assignment]
     tournament = _get_one_db(f"SELECT name FROM tournaments WHERE tid={tid}")[0]
-    p1 = _get_one_db(f"SELECT uid,user,decklist FROM players WHERE pid={pid1}")
-    p2 = _get_one_db(f"SELECT uid,user,decklist FROM players WHERE pid={pid2}")
+    p1 = _get_one_db(f"SELECT uid,username,decklist FROM players WHERE pid={pid1}")
+    p2 = _get_one_db(f"SELECT uid,username,decklist FROM players WHERE pid={pid2}")
 
     message_str = f"""
 <@{p1[0]}> <@{p2[0]}> you may now start your match! Don't forget to use the /report command to report after you're done.
