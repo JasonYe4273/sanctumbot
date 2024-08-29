@@ -1,7 +1,13 @@
+import os
 import asyncio
 import discord
 from discord import app_commands
-from secrets import TOKEN, BOT_ID, SANCTUM_ID
+try:
+    from secrets import TOKEN, BOT_ID, SANCTUM_ID
+except:
+    TOKEN = os.environ.get('TOKEN', '')
+    BOT_ID = os.environ.get('BOT_ID', '')
+    SANCTUM_ID = os.environ.get('SANCTUM_ID', '')
 from database import con, cur
 
 intents = discord.Intents.default()
