@@ -1,7 +1,6 @@
 import os
 import asyncio
 import discord
-from psycopg2.errors import SyntaxError  # type: ignore[import]
 from discord import app_commands
 try:
     from secrets import TOKEN, BOT_ID, SANCTUM_ID
@@ -34,28 +33,28 @@ def _get_one_db(query_str: str):
     try:
         cur.execute(query_str)
         return cur.fetchone()
-    except SyntaxError:
+    except Exception as e:
         cur.execute("ROLLBACK")
         con.commit()
-        raise Exception("Database Error")
+        raise e
 
 def _get_all_db(query_str: str):
     try:
         cur.execute(query_str)
         return cur.fetchall()
-    except SyntaxError:
+    except Exception as e:
         cur.execute("ROLLBACK")
         con.commit()
-        raise Exception("Database Error")
+        raise e
 
 def _set_db(query_str: str):
     try:
         cur.execute(query_str)
         con.commit()
-    except SyntaxError:
+    except Exception as e:
         cur.execute("ROLLBACK")
         con.commit()
-        raise Exception("Database Error")
+        raise e
 
 
 async def _get_tournament(interaction: discord.Interaction, tid: int):
@@ -234,7 +233,7 @@ async def drop(interaction: discord.Interaction, tid: int):
     guild=discord.Object(id=SANCTUM_ID)
 )
 async def registrations(interaction: discord.Interaction, include_dropped: bool):
-    registrations = _get_all_db(f"SELECT tid,name,decklist,wins,losses,draws,dropped FROM players INNER JOIN tournaments ON players.tid=tournaments.tid WHERE username='{str(interaction.user)}'")
+    registrations = _get_all_db(f"SELECT tournaments.tid,name,decklist,wins,losses,draws,dropped FROM players INNER JOIN tournaments ON players.tid=tournaments.tid WHERE username='{str(interaction.user)}'")
 
     message_str = "Here's a list of all of your current active player registrations:\n"
     for p in registrations:
