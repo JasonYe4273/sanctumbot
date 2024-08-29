@@ -504,18 +504,6 @@ Here are your opponent's decklists:
 """
     message = await channel.send(message_str)
 
-@tree.command(  # type: ignore[arg-type]
-    name="_try",
-    description="test",
-    guild=discord.Object(id=SANCTUM_ID)
-)
-async def tryqueue(interaction: discord.Interaction, tid: int):
-    tournament = await _get_tournament(interaction, tid)
-    if not tournament:
-        return
-
-    await _try_assign_match(tid)
-
 
 
 ### GENERAL BOT STUFF
