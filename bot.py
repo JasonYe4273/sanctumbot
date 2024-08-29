@@ -307,7 +307,7 @@ async def lfg(interaction: discord.Interaction, tid: int):
         await send_error(interaction, f"You are currently in an outstanding match for {tournament}. Please report that match result before re-joining the queue.")
         return
 
-    MAX_MATCHES = 8
+    MAX_MATCHES = 6
     if len(_get_all_db(f"SELECT * FROM matches WHERE tid={tid} AND (pid1={pid} OR pid2={pid})")) >= MAX_MATCHES:
         await send_error(interaction, f"You have already played the maximum number of matches for {tournament}.")
         return
