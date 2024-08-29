@@ -107,7 +107,7 @@ async def create_tournament(interaction: discord.Interaction, name: str, descrip
     guild=discord.Object(id=SANCTUM_ID)
 )
 @app_commands.checks.has_permissions(administrator=True)
-async def get_players(interaction: discord.Interaction, tid: int, include_dropped: bool):
+async def get_players(interaction: discord.Interaction, tid: int, include_dropped: bool, publicize: bool):
     tournament = await _get_tournament(interaction, tid)
     if not tournament:
         return
@@ -133,7 +133,7 @@ async def get_players(interaction: discord.Interaction, tid: int, include_droppe
             message_str += "\n"
         message_str += "```"
 
-    await interaction.response.send_message(message_str, ephemeral=True)
+    await interaction.response.send_message(message_str, ephemeral=(not publicize))
 
 
 
