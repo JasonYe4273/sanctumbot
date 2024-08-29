@@ -1,6 +1,7 @@
 import os
 import asyncio
 import discord
+from psycopg2.errors import SyntaxError  # type: ignore[import]
 from discord import app_commands
 try:
     from secrets import TOKEN, BOT_ID, SANCTUM_ID
@@ -29,8 +30,36 @@ async def send_error(interaction: discord.Interaction, message: str):
 ### UTIL
 
 
+def _get_one_db(query_str: str):
+    try:
+        cur.execute(query_str)
+        return cur.fetchone()
+    except SyntaxError:
+        cur.execute("ROLLBACK")
+        con.commit()
+        raise Exception("Database Error")
+
+def _get_all_db(query_str: str):
+    try:
+        cur.execute(query_str)
+        return cur.fetchall()
+    except SyntaxError:
+        cur.execute("ROLLBACK")
+        con.commit()
+        raise Exception("Database Error")
+
+def _set_db(query_str: str):
+    try:
+        cur.execute(query_str)
+        con.commit()
+    except SyntaxError:
+        cur.execute("ROLLBACK")
+        con.commit()
+        raise Exception("Database Error")
+
+
 async def _get_tournament(interaction: discord.Interaction, tid: int):
-    tournament = cur.execute(f"SELECT name FROM tournaments WHERE rowid={tid}").fetchone()
+    tournament = _get_one_db(f"SELECT name FROM tournaments WHERE tid={tid}")
     if not tournament:
         await send_error(interaction, f"Could not find tournament with ID {tid}.")
         return False
@@ -39,7 +68,7 @@ async def _get_tournament(interaction: discord.Interaction, tid: int):
 
 async def _get_pid(interaction: discord.Interaction, tid: int):
     user = str(interaction.user)
-    player = cur.execute(f"SELECT rowid FROM players WHERE tid={tid} AND user='{user}' AND dropped=0").fetchone()
+    player = _get_one_db(f"SELECT pid FROM players WHERE tid={tid} AND username='{user}' AND NOT dropped")
     if not player:
         await send_error(interaction, f"You are not registered for this tournament.")
         return False
@@ -59,10 +88,10 @@ async def _get_pid(interaction: discord.Interaction, tid: int):
 )
 @app_commands.checks.has_permissions(administrator=True)
 async def create_tournament(interaction: discord.Interaction, name: str, description: str):
-    cur.execute(
-        "INSERT INTO tournaments VALUES(?, ?, ?, ?, ?)", (name, description, True, "async", interaction.channel_id)
+    _set_db(
+        f"""INSERT INTO tournaments (name, description, active, type, channel) VALUES
+        ('{name}', '{description}', TRUE, 'async', {interaction.channel_id})"""
     )
-    con.commit()
 
     message_str = f"""```ansi
 [0;32mTournament created!
@@ -83,10 +112,10 @@ async def get_players(interaction: discord.Interaction, tid: int, include_droppe
     if not tournament:
         return
 
-    query = f"SELECT rowid,user,decklist,wins,losses,draws,dropped FROM players WHERE tid={tid}"
+    query = f"SELECT pid,user,decklist,wins,losses,draws,dropped FROM players WHERE tid={tid}"
     if not include_dropped:
-        query += " AND dropped=0"
-    players = cur.execute(query).fetchall()
+        query += " AND NOT dropped"
+    players = _get_all_db(query)
 
     message_str = ""
     if len(players) == 0:
@@ -119,13 +148,12 @@ async def drop_player(interaction: discord.Interaction, tid: int, user: str):
     if not tournament:
         return
 
-    registered = cur.execute(f"SELECT rowid FROM players WHERE user='{user}' AND tid={tid} AND dropped=0").fetchone()
+    registered = _get_one_db(f"SELECT pid FROM players WHERE username='{user}' AND tid={tid} AND NOT dropped")
     if not registered:
         await send_error(interaction, f"{user} is not currently registered for this tournament.")
         return
 
-    pid = cur.execute(f"UPDATE players SET dropped=1 WHERE user='{user}' AND tid={tid}").lastrowid
-    con.commit()
+    _set_db(f"UPDATE players SET dropped=TRUE WHERE username='{user}' AND tid={tid}")
 
     message_str = f"{user} has successfully been dropped from {tournament}."
     await interaction.response.send_message(message_str, ephemeral=True)
@@ -142,9 +170,7 @@ async def drop_player(interaction: discord.Interaction, tid: int, user: str):
     guild=discord.Object(id=SANCTUM_ID)
 )
 async def tournaments(interaction: discord.Interaction):
-    tournaments = cur.execute(
-        "SELECT rowid,name,description FROM tournaments WHERE active=true"
-    ).fetchall()
+    tournaments = _get_all_db("SELECT tid,name,description FROM tournaments WHERE active")
 
     message_str = "Here's a list of active tournaments:\n```ansi"
     for t in tournaments:
@@ -166,14 +192,15 @@ async def register(interaction: discord.Interaction, tid: int):
         return
 
     user = str(interaction.user)
-    already_registered = cur.execute(f"SELECT rowid FROM players WHERE user='{user}' AND tid={tid} AND dropped=0").fetchone()
+    already_registered = _get_one_db(f"SELECT pid FROM players WHERE username='{user}' AND tid={tid} AND NOT dropped")
     if already_registered:
         await send_error(interaction, f"You are already registered for that tournament. You must drop to re-register.")
         return
 
-    pid = cur.execute("INSERT INTO players VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
-        (tid, user, interaction.user.id, '', 0, 0, 0, False)).lastrowid
-    con.commit()
+    _set_db(
+        f"""INSERT INTO players (tid, username, uid, wins, losses, draws, dropped) VALUES
+        ({tid}, '{user}', {interaction.user.id}, 0, 0, 0, FALSE)""",
+    )
 
     message_str = f"Registered for {tournament}!"
     await interaction.response.send_message(message_str, ephemeral=True)
@@ -194,8 +221,7 @@ async def drop(interaction: discord.Interaction, tid: int):
     if not pid:
         return
 
-    cur.execute(f"UPDATE players SET dropped=1 WHERE rowid={pid[0]}").lastrowid
-    con.commit()
+    set_db(f"UPDATE players SET dropped=TRUE WHERE pid={pid[0]}")
 
     message_str = f"You have successfully been dropped from {tournament}."
     await interaction.response.send_message(message_str, ephemeral=True)
@@ -208,8 +234,7 @@ async def drop(interaction: discord.Interaction, tid: int):
     guild=discord.Object(id=SANCTUM_ID)
 )
 async def registrations(interaction: discord.Interaction, include_dropped: bool):
-    query = f"SELECT tournaments.rowid,name,decklist,wins,losses,draws,dropped FROM players INNER JOIN tournaments ON players.tid=tournaments.rowid WHERE user='{str(interaction.user)}'"
-    registrations = cur.execute(query).fetchall()
+    registrations = _get_all_db(f"SELECT tid,name,decklist,wins,losses,draws,dropped FROM players INNER JOIN tournaments ON players.tid=tournaments.tid WHERE user='{str(interaction.user)}'")
 
     message_str = "Here's a list of all of your current active player registrations:\n"
     for p in registrations:
@@ -242,8 +267,7 @@ async def submitdeck(interaction: discord.Interaction, tid: int, decklist: str):
     if not pid:
         return
 
-    cur.execute(f"UPDATE players SET decklist='{decklist}' WHERE rowid={pid}")
-    con.commit()
+    _set_db(f"UPDATE players SET decklist='{decklist}' WHERE pid={pid}")
 
     message_str = f"[Decklist](<{decklist}>) submitted for {tournament}!"
     await interaction.response.send_message(message_str, ephemeral=True)
@@ -267,11 +291,11 @@ async def lfg(interaction: discord.Interaction, tid: int):
     if not pid:
         return
 
-    if not cur.execute(f"SELECT decklist FROM players WHERE rowid={pid}").fetchone()[0]:
+    if not _get_one_db(f"SELECT decklist FROM players WHERE pid={pid}")[0]:
         await send_error(interaction, f"You must first submit a decklist for this tournament.")
         return
 
-    if cur.execute(f"SELECT * FROM queue WHERE tid={tid} AND pid={pid}").fetchone():
+    if _get_one_db(f"SELECT * FROM queue WHERE tid={tid} AND pid={pid}"):
         await send_error(interaction, f"You are already in the Looking For Games queue for {tournament}.")
         return
 
@@ -280,17 +304,16 @@ async def lfg(interaction: discord.Interaction, tid: int):
             await send_error(interaction, f"You are already in the process of being matched for {tournament}.")
             return
 
-    if cur.execute(f"SELECT * FROM matches WHERE tid={tid} AND reported=0 AND (pid1={pid} OR pid2={pid})").fetchone():
+    if _get_one_db(f"SELECT * FROM matches WHERE tid={tid} AND NOT reported AND (pid1={pid} OR pid2={pid})"):
         await send_error(interaction, f"You are currently in an outstanding match for {tournament}. Please report that match result before re-joining the queue.")
         return
 
     MAX_MATCHES = 8
-    if len(cur.execute(f"SELECT * FROM matches WHERE tid={tid} AND (pid1={pid} OR pid2={pid})").fetchall()) >= MAX_MATCHES:
+    if len(_get_all_db(f"SELECT * FROM matches WHERE tid={tid} AND (pid1={pid} OR pid2={pid})")) >= MAX_MATCHES:
         await send_error(interaction, f"You have already played the maximum number of matches for {tournament}.")
         return
 
-    cur.execute("INSERT INTO queue VALUES (?, ?)", (tid, pid))
-    con.commit()
+    _set_db(f"INSERT INTO queue (tid, pid) VALUES ({tid}, {pid})")
 
     message_str = f"You have successfully joined the Looking For Games queue for {tournament}!"
     await interaction.response.send_message(message_str, ephemeral=True)
@@ -313,13 +336,12 @@ async def leave(interaction: discord.Interaction, tid: int):
     if not pid:
         return
 
-    queue_place = cur.execute(f"SELECT * FROM queue WHERE tid={tid} AND pid={pid}").fetchone()
+    queue_place = _get_one_db(f"SELECT * FROM queue WHERE tid={tid} AND pid={pid}")
     if not queue_place:
         await send_error(interaction, f"You are not in the Looking For Games queue for {tournament}.")
         return
 
-    cur.execute(f"DELETE FROM queue WHERE tid={tid} AND pid={pid}")
-    con.commit()
+    _set_db(f"DELETE FROM queue WHERE tid={tid} AND pid={pid}")
 
     message_str = f"You have left the Looking For Games queue for {tournament}."
     await interaction.response.send_message(message_str, ephemeral=True)
@@ -340,7 +362,7 @@ async def report(interaction: discord.Interaction, tid: int, wins: int, losses: 
     if not pid:
         return
 
-    match = cur.execute(f"SELECT rowid,pid1,pid2 FROM matches WHERE tid={tid} AND reported=0 AND (pid1={pid} OR pid2={pid})").fetchone()
+    match = _get_one_db(f"SELECT mid,pid1,pid2 FROM matches WHERE tid={tid} AND NOT reported AND (pid1={pid} OR pid2={pid})")
     if not match:
         await send_error(interaction, f"You do not have any outstanding matches for this tournament.")
 
@@ -354,28 +376,29 @@ async def report(interaction: discord.Interaction, tid: int, wins: int, losses: 
 
     # TODO: result confirmations. for now things are locked once submitted. oh well.
 
-    cur.execute(f"UPDATE matches SET reported=1,wins{me_n}={wins},wins{you_n}={losses} WHERE rowid={match[0]}")
+    _set_db(f"UPDATE matches SET reported=TRUE,wins{me_n}={wins},wins{you_n}={losses} WHERE mid={match[0]}")
     if wins > losses:
-        w = cur.execute(f"SELECT wins FROM players WHERE rowid={pid}").fetchone()[0]
-        cur.execute(f"UPDATE players SET wins={w+1} WHERE rowid={pid}")
-        l = cur.execute(f"SELECT losses FROM players WHERE rowid={op_pid}").fetchone()[0]
-        cur.execute(f"UPDATE players SET losses={l+1} WHERE rowid={op_pid}")
-    elif wins < losses:
-        w = cur.execute(f"SELECT wins FROM players WHERE rowid={op_pid}").fetchone()[0]
-        cur.execute(f"UPDATE players SET wins={w+1} WHERE rowid={op_pid}")
-        l = cur.execute(f"SELECT losses FROM players WHERE rowid={pid}").fetchone()[0]
-        cur.execute(f"UPDATE players SET losses={l+1} WHERE rowid={pid}")
-    else:
-        d1 = cur.execute(f"SELECT draws FROM players WHERE rowid={pid}").fetchone()[0]
-        cur.execute(f"UPDATE players SET draws={d1+1} WHERE rowid={pid}")
-        d2 = cur.execute(f"SELECT draws FROM players WHERE rowid={op_pid}").fetchone()[0]
-        cur.execute(f"UPDATE players SET draws={d2+1} WHERE rowid={op_pid}")
-    con.commit()
+        w = _get_one_db(f"SELECT wins FROM players WHERE pid={pid}")[0]
+        _set_db(f"UPDATE players SET wins={w+1} WHERE pid={pid}")
 
-    channel: discord.TextChannel = client.get_channel(cur.execute(f"SELECT channel FROM tournaments WHERE rowid={tid}").fetchone()[0])  # type: ignore[assignment]
-    tournament = cur.execute(f"SELECT name FROM tournaments WHERE rowid={tid}").fetchone()[0]
-    uid1 = cur.execute(f"SELECT uid FROM players WHERE rowid={pid}").fetchone()[0]
-    uid2 = cur.execute(f"SELECT uid FROM players WHERE rowid={op_pid}").fetchone()[0]
+        l = _get_one_db(f"SELECT losses FROM players WHERE pid={op_pid}")[0]
+        _set_db(f"UPDATE players SET losses={l+1} WHERE pid={op_pid}")
+    elif wins < losses:
+        w = _get_one_db(f"SELECT wins FROM players WHERE pid={op_pid}")[0]
+        _set_db(f"UPDATE players SET wins={w+1} WHERE pid={op_pid}")
+
+        l = _get_one_db(f"SELECT losses FROM players WHERE pid={pid}")[0]
+        _set_db(f"UPDATE players SET losses={l+1} WHERE pid={pid}")
+    else:
+        d1 = _get_one_db(f"SELECT draws FROM players WHERE pid={pid}")[0]
+        _set_db(f"UPDATE players SET draws={d1+1} WHERE pid={pid}")
+
+        d2 = _get_one_db(f"SELECT draws FROM players WHERE pid={op_pid}")[0]
+        _set_db(f"UPDATE players SET draws={d2+1} WHERE pid={op_pid}")
+
+    channel: discord.TextChannel = client.get_channel(_get_one_db(f"SELECT channel FROM tournaments WHERE tid={tid}")[0])  # type: ignore[assignment]
+    uid1 = _get_one_db(f"SELECT uid FROM players WHERE pid={pid}")[0]
+    uid2 = _get_one_db(f"SELECT uid FROM players WHERE pid={op_pid}")[0]
     
     message_str = f"""
 Match result reported:<@{uid1}> {wins}-{losses} <@{uid2}>.
@@ -387,15 +410,15 @@ Match result reported:<@{uid1}> {wins}-{losses} <@{uid2}>.
 ### MATCH LOGIC
 
 def _find_matchable_pair(tid: int):
-    queue = cur.execute(f"SELECT pid FROM queue WHERE tid={tid}").fetchall()
+    queue = _get_all_db(f"SELECT pid FROM queue WHERE tid={tid}")
     if len(queue) < 2:
         return False
     for i in queue:
         for j in queue:
             if i[0] == j[0]:
                 continue
-            already_played = cur.execute(f"SELECT * FROM matches WHERE pid1={i[0]} AND pid2={j[0]}").fetchall()
-            already_played += cur.execute(f"SELECT * FROM matches WHERE pid1={j[0]} AND pid2={i[0]}").fetchall()
+            already_played = _get_all_db(f"SELECT * FROM matches WHERE pid1={i[0]} AND pid2={j[0]}")
+            already_played += _get_all_db(f"SELECT * FROM matches WHERE pid1={j[0]} AND pid2={i[0]}")
 
             if len(already_played) == 0:
                 return (i[0], j[0])
@@ -410,15 +433,14 @@ async def _try_assign_match(tid: int):
     pid2 = pair[1]
 
     # remove them from the queue
-    cur.execute(f"DELETE FROM queue WHERE tid={tid} AND pid={pid1}")
-    cur.execute(f"DELETE FROM queue WHERE tid={tid} AND pid={pid2}")
-    con.commit()
+    _set_db(f"DELETE FROM queue WHERE tid={tid} AND pid={pid1}")
+    _set_db(f"DELETE FROM queue WHERE tid={tid} AND pid={pid2}")
 
     # send message
-    channel: discord.TextChannel = client.get_channel(cur.execute(f"SELECT channel FROM tournaments WHERE rowid={tid}").fetchone()[0])  # type: ignore[assignment]
-    tournament = cur.execute(f"SELECT name FROM tournaments WHERE rowid={tid}").fetchone()[0]
-    uid1 = cur.execute(f"SELECT uid FROM players WHERE rowid={pid1}").fetchone()[0]
-    uid2 = cur.execute(f"SELECT uid FROM players WHERE rowid={pid2}").fetchone()[0]
+    channel: discord.TextChannel = client.get_channel(_get_one_db(f"SELECT channel FROM tournaments WHERE tid={tid}")[0])  # type: ignore[assignment]
+    tournament = _get_one_db(f"SELECT name FROM tournaments WHERE tid={tid}")[0]
+    uid1 = _get_one_db(f"SELECT uid FROM players WHERE pid={pid1}")[0]
+    uid2 = _get_one_db(f"SELECT uid FROM players WHERE pid={pid2}")[0]
 
     message_str = f"""
 <@{uid1}> <@{uid2}> you have been matched in {tournament}!
@@ -459,9 +481,8 @@ If one or both players have not reacted to this message within the next five min
         return
     elif h["p1"]["reacted"]:
         # if only p1 has reacted readd them and remove p2
-        if not cur.execute(f"SELECT * FROM queue WHERE tid={tid} AND pid={pid1}").fetchone():
-            cur.execute("INSERT INTO queue VALUES (?, ?)", (tid, pid1))
-            con.commit()
+        if not _get_one_db(f"SELECT * FROM queue WHERE tid={tid} AND pid={pid1}"):
+            _set_db(f"INSERT INTO queue (tid, pid) VALUES ({tid}, {pid1})")
 
         message_str = f"""
 <@{uid1}> you have been re-added to the queue for {tournament}.
@@ -469,9 +490,8 @@ If one or both players have not reacted to this message within the next five min
 """
     elif h["p2"]["reacted"]:
         # if only p2 has reacted readd them and remove p1
-        if not cur.execute(f"SELECT * FROM queue WHERE tid={tid} AND pid={pid2}").fetchone():
-            cur.execute("INSERT INTO queue VALUES (?, ?)", (tid, pid2))
-            con.commit()
+        if not _get_one_db(f"SELECT * FROM queue WHERE tid={tid} AND pid={pid2}"):
+            _set_db(f"INSERT INTO queue (tid, pid) VALUES ({tid}, {pid2})")
 
         message_str = f"""
 <@{uid2}> you have been re-added to the queue for {tournament}.
@@ -492,14 +512,12 @@ If one or both players have not reacted to this message within the next five min
     await notif_message.delete()
 
 async def _create_match(tid: int, pid1: int, pid2: int):
-    cur.execute("INSERT INTO matches VALUES (?, ?, ?, ?, ?, ?)",
-        (tid, pid1, pid2, 0, 0, 0))
-    con.commit()
+    _set_db(f"INSERT INTO matches (tid, pid1, pid2, reported, wins1, wins2) VALUES ({tid}, {pid1}, {pid2}, FALSE, 0, 0)")
 
-    channel: discord.TextChannel = client.get_channel(cur.execute(f"SELECT channel FROM tournaments WHERE rowid={tid}").fetchone()[0])  # type: ignore[assignment]
-    tournament = cur.execute(f"SELECT name FROM tournaments WHERE rowid={tid}").fetchone()[0]
-    p1 = cur.execute(f"SELECT uid,user,decklist FROM players WHERE rowid={pid1}").fetchone()
-    p2 = cur.execute(f"SELECT uid,user,decklist FROM players WHERE rowid={pid2}").fetchone()
+    channel: discord.TextChannel = client.get_channel(_get_one_db(f"SELECT channel FROM tournaments WHERE tid={tid}")[0])  # type: ignore[assignment]
+    tournament = _get_one_db(f"SELECT name FROM tournaments WHERE tid={tid}")[0]
+    p1 = _get_one_db(f"SELECT uid,user,decklist FROM players WHERE pid={pid1}")
+    p2 = _get_one_db(f"SELECT uid,user,decklist FROM players WHERE pid={pid2}")
 
     message_str = f"""
 <@{p1[0]}> <@{p2[0]}> you may now start your match! Don't forget to use the /report command to report after you're done.

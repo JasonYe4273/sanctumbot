@@ -1,1 +1,3 @@
 discord.py==2.4.0
+psycopg[c]; sys_platform == "linux"
+psycopg[binary]; sys_platform != "linux"
