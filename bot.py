@@ -306,11 +306,13 @@ async def lfg(interaction: discord.Interaction, tid: int):
 
     start_end = _get_one_db(f"SELECT start_time, end_time FROM tournaments WHERE tid={tid}")
     if start_end[0] and start_end[0] > datetime.now().timestamp():
-        await interaction.response.send_message(f"The tournament has not started yet. It will start at <t:{start_end[0]}:F> (<t:{start_end[0]}:R>).", ephemeral=True)
+        await send_error(interaction, "The tournament has not started yet.")
+        await interaction.response.send_message(f"It will start at <t:{start_end[0]}:F> (<t:{start_end[0]}:R>).", ephemeral=True)
         return
 
     if start_end[1] and start_end[1] < datetime.now().timestamp():
-        await interaction.response.send_message(f"The tournament already ended <t:{start_end[1]}:R>, at <t:{start_end[1]}:F>.", ephemeral=True)
+        await send_error(interaction, "The tournament has already concluded.")
+        await interaction.response.send_message(f"It ended <t:{start_end[1]}:R>, at <t:{start_end[1]}:F>.", ephemeral=True)
         return
 
     if not _get_one_db(f"SELECT decklist FROM players WHERE pid={pid}")[0]:
