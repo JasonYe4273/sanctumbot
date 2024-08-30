@@ -25,7 +25,7 @@ async def send_error(interaction: discord.Interaction, message: str):
     )
 
 def log_command(interaction: discord.Interaction) -> bool:
-    print(f"{str(interaction.user)} used /{interaction.command.name}")
+    print(f"{str(interaction.user)} used /{interaction.command.name}")  # type: ignore[union-attr]
     return True
 
 
@@ -358,6 +358,28 @@ async def leave(interaction: discord.Interaction, tid: int):
 
     message_str = f"You have left the Looking For Games queue for {tournament}."
     await interaction.response.send_message(message_str, ephemeral=True)
+
+
+
+@tree.command(  # type: ignore[arg-type]
+    name="queue",
+    description="Show the 'looking for games' queue",
+    guild=discord.Object(id=SANCTUM_ID)
+)
+@app_commands.check(log_command)
+async def queue(interaction: discord.Interaction, tid: int):
+    tournament = await _get_tournament(interaction, tid)
+    if not tournament:
+        return
+
+    queue = _get_all_db(f"SELECT username FROM queue INNER JOIN players ON queue.pid=players.pid WHERE tid={tid}")
+    if len(queue) == 0:
+        await interaction.response.send_message(f"There is no one in the queue for {tournament}.")
+    else:
+        message_str = f"The current queue for {tournament} is:"
+        for u in queue:
+            message_str += f"\n- {u[0]}"
+        await interaction.response.send_message(message_str)
 
 
 
