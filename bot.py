@@ -24,6 +24,10 @@ async def send_error(interaction: discord.Interaction, message: str):
         ephemeral=True
     )
 
+def log_command(interaction: discord.Interaction) -> bool:
+    print(f"{str(interaction.user)} used /{interaction.command}")
+    return True
+
 
 
 ### UTIL
@@ -85,6 +89,7 @@ async def _get_pid(interaction: discord.Interaction, tid: int):
     description="[ADMIN ONLY] Create a tournament",
     guild=discord.Object(id=SANCTUM_ID)
 )
+@app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
 async def create_tournament(interaction: discord.Interaction, name: str, description: str):
     _set_db(
@@ -105,6 +110,7 @@ async def create_tournament(interaction: discord.Interaction, name: str, descrip
     description="[ADMIN ONLY] Get the table of all players in a tournament",
     guild=discord.Object(id=SANCTUM_ID)
 )
+@app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
 async def get_players(interaction: discord.Interaction, tid: int, include_dropped: bool, publicize: bool):
     tournament = await _get_tournament(interaction, tid)
@@ -141,6 +147,7 @@ async def get_players(interaction: discord.Interaction, tid: int, include_droppe
     description="[ADMIN ONLY] Drop a player from a tournament",
     guild=discord.Object(id=SANCTUM_ID)
 )
+@app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
 async def drop_player(interaction: discord.Interaction, tid: int, user: str):
     tournament = await _get_tournament(interaction, tid)
@@ -168,6 +175,7 @@ async def drop_player(interaction: discord.Interaction, tid: int, user: str):
     description="Get a list of tournaments",
     guild=discord.Object(id=SANCTUM_ID)
 )
+@app_commands.check(log_command)
 async def tournaments(interaction: discord.Interaction):
     tournaments = _get_all_db("SELECT tid,name,description FROM tournaments WHERE active")
 
@@ -185,6 +193,7 @@ async def tournaments(interaction: discord.Interaction):
     description="Register for a tournament",
     guild=discord.Object(id=SANCTUM_ID)
 )
+@app_commands.check(log_command)
 async def register(interaction: discord.Interaction, tid: int):
     tournament = await _get_tournament(interaction, tid)
     if not tournament:
@@ -211,6 +220,7 @@ async def register(interaction: discord.Interaction, tid: int):
     description="Drop from a tournament",
     guild=discord.Object(id=SANCTUM_ID)
 )
+@app_commands.check(log_command)
 async def drop(interaction: discord.Interaction, tid: int):
     tournament = await _get_tournament(interaction, tid)
     if not tournament:
@@ -232,6 +242,7 @@ async def drop(interaction: discord.Interaction, tid: int):
     description="Find all of your tournament registrations",
     guild=discord.Object(id=SANCTUM_ID)
 )
+@app_commands.check(log_command)
 async def registrations(interaction: discord.Interaction, include_dropped: bool):
     registrations = _get_all_db(f"SELECT tournaments.tid,name,decklist,wins,losses,draws,dropped FROM players INNER JOIN tournaments ON players.tid=tournaments.tid WHERE username='{str(interaction.user)}'")
 
@@ -257,6 +268,7 @@ async def registrations(interaction: discord.Interaction, include_dropped: bool)
     description="Submit your decklist for tournament",
     guild=discord.Object(id=SANCTUM_ID)
 )
+@app_commands.check(log_command)
 async def submitdeck(interaction: discord.Interaction, tid: int, decklist: str):
     tournament = await _get_tournament(interaction, tid)
     if not tournament:
@@ -281,6 +293,7 @@ HANDLING = dict()  # type: ignore[var-annotated]
     description="Join the 'looking for games' queue",
     guild=discord.Object(id=SANCTUM_ID)
 )
+@app_commands.check(log_command)
 async def lfg(interaction: discord.Interaction, tid: int):
     tournament = await _get_tournament(interaction, tid)
     if not tournament:
@@ -326,6 +339,7 @@ async def lfg(interaction: discord.Interaction, tid: int):
     description="Leave the 'looking for games' queue",
     guild=discord.Object(id=SANCTUM_ID)
 )
+@app_commands.check(log_command)
 async def leave(interaction: discord.Interaction, tid: int):
     tournament = await _get_tournament(interaction, tid)
     if not tournament:
@@ -352,6 +366,7 @@ async def leave(interaction: discord.Interaction, tid: int):
     description="Report a match result",
     guild=discord.Object(id=SANCTUM_ID)
 )
+@app_commands.check(log_command)
 async def report(interaction: discord.Interaction, tid: int, wins: int, losses: int):
     tournament = await _get_tournament(interaction, tid)
     if not tournament:

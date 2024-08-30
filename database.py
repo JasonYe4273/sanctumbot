@@ -21,6 +21,8 @@ cur.execute("""CREATE TABLE IF NOT EXISTS tournaments(
   active BOOL NOT NULL,
   type TEXT NOT NULL,
   channel BIGINT NOT NULL,
+  start_time BIGINT,
+  end_time BIGINT,
   PRIMARY KEY(tid)
 )""")
 cur.execute("""CREATE TABLE IF NOT EXISTS players(
