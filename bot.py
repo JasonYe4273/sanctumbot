@@ -1,5 +1,6 @@
 import os
 import asyncio
+from datetime import datetime
 import discord
 from discord import app_commands
 try:
@@ -91,10 +92,10 @@ async def _get_pid(interaction: discord.Interaction, tid: int):
 )
 @app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
-async def create_tournament(interaction: discord.Interaction, name: str, description: str):
+async def create_tournament(interaction: discord.Interaction, name: str, description: str, start: int, end: int):
     _set_db(
-        f"""INSERT INTO tournaments (name, description, active, type, channel) VALUES
-        ('{name}', '{description}', TRUE, 'async', {interaction.channel_id})"""
+        f"""INSERT INTO tournaments (name, description, active, type, channel, start_time, end_time) VALUES
+        ('{name}', '{description}', TRUE, 'async', {interaction.channel_id}, {start}, {end})"""
     )
 
     message_str = f"""```ansi
@@ -301,6 +302,15 @@ async def lfg(interaction: discord.Interaction, tid: int):
 
     pid = await _get_pid(interaction, tid)
     if not pid:
+        return
+
+    start_end = _get_one_db(f"SELECT start_time, end_time FROM tournaments WHERE tid={tid}")
+    if start_end[0] and start_end[0] > datetime.now().timestamp():
+        await send_error(interaction, f"The tournament has not started yet. It will start at <t:{start_end[0]}:F> (<t:{start_end[0]}:R>).")
+        return
+
+    if start_end[1] and start_end[1] < datetime.now().timestamp():
+        await send_error(interaction, f"The tournament already ended <t:{start_end[1]}:R>, at <t:{start_end[1]}:F>.")
         return
 
     if not _get_one_db(f"SELECT decklist FROM players WHERE pid={pid}")[0]:
