@@ -374,12 +374,12 @@ async def queue(interaction: discord.Interaction, tid: int):
 
     queue = _get_all_db(f"SELECT username FROM queue INNER JOIN players ON queue.pid=players.pid WHERE queue.tid={tid}")
     if len(queue) == 0:
-        await interaction.response.send_message(f"There is no one in the queue for {tournament}.")
+        await interaction.response.send_message(f"There is no one in the queue for {tournament}.", ephemeral=True)
     else:
         message_str = f"The current queue for {tournament} is:"
         for u in queue:
             message_str += f"\n- {u[0]}"
-        await interaction.response.send_message(message_str)
+        await interaction.response.send_message(message_str, ephemeral=True)
 
 
 
