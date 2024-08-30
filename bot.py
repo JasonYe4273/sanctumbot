@@ -511,7 +511,7 @@ If one or both players have not reacted to this message within the next five min
     }
 
     # wait 5 minutes and then check if still handling this
-    await asyncio.sleep(30)
+    await asyncio.sleep(300)
     if message.id not in HANDLING:
         return
 
