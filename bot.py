@@ -25,7 +25,7 @@ async def send_error(interaction: discord.Interaction, message: str):
     )
 
 def log_command(interaction: discord.Interaction) -> bool:
-    print(f"{str(interaction.user)} used /{interaction.command}")
+    print(f"{str(interaction.user)} used /{interaction.command.name}")
     return True
 
 
