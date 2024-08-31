@@ -139,6 +139,7 @@ async def get_players(interaction: discord.Interaction, tid: int, include_droppe
             message_str += "\n"
         message_str += "```"
 
+    print(message_str)
     await interaction.response.send_message(message_str, ephemeral=(not publicize))
 
 
