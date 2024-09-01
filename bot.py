@@ -128,7 +128,7 @@ async def get_players(interaction: discord.Interaction, tid: int, include_droppe
     for p in players:
         tiebreakers[p[0]] = {
             "pts": p[3]*3 + p[5],
-            "mw": p[3]/(p[3]+p[4]+p[5]),
+            "mw": p[3]/(p[3]+p[4]+p[5]) if p[3]+[4]+p[5]>0 else 0,
             "gw": 0,
             "gl": 0,
             "ops": list()
@@ -149,8 +149,12 @@ async def get_players(interaction: discord.Interaction, tid: int, include_droppe
         for op in tiebreakers[p[0]]["ops"]:
             omw += max(tiebreakers[op]["mw"],1/3)
             ogw += max(tiebreakers[op]["gw"],1/3)
-        tiebreakers[p[0]]["omw"] = omw / len(tiebreakers[p[0]]["ops"])
-        tiebreakers[p[0]]["ogw"] = ogw / len(tiebreakers[p[0]]["ops"])
+        if len(tiebreakers[p[0]]["ops"]) > 0:
+            tiebreakers[p[0]]["omw"] = omw / len(tiebreakers[p[0]]["ops"])
+            tiebreakers[p[0]]["ogw"] = ogw / len(tiebreakers[p[0]]["ops"])
+        else:
+            tiebreakers[p[0]]["omw"] = 0
+            tiebreakers[p[0]]["ogw"] = 0
 
     def tiebreak(p):
         return 8*tiebreakers[p[0]]["pts"] + 4*tiebreakers[p[0]]["omw"] + 2*tiebreakers[p[0]]["gw"] + tiebreakers[p[0]]["ogw"]
