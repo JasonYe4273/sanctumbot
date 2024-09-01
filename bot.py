@@ -183,7 +183,7 @@ async def get_players(interaction: discord.Interaction, tid: int, include_droppe
         message_strs[page] += "```"
 
     for ms in message_strs:
-        interaction.channel.send(ms)
+        await interaction.channel.send(ms)
 
     await interaction.response.send_message("Printed", ephemeral=True)
 
