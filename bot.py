@@ -129,7 +129,7 @@ async def get_players(interaction: discord.Interaction, tid: int, include_droppe
         print(p)
         tiebreakers[p[0]] = {
             "pts": p[3]*3 + p[5],
-            "mw": p[3]/(p[3]+p[4]+p[5]) if p[3]+p[4]+p[5]>0 else 0,
+            "mwp": p[3]/(p[3]+p[4]+p[5]) if p[3]+p[4]+p[5]>0 else 0,
             "gw": 0,
             "gl": 0,
             "ops": list()
@@ -145,11 +145,17 @@ async def get_players(interaction: discord.Interaction, tid: int, include_droppe
             tiebreakers[p[0]]["gl"] += m[2]
 
     for p in players:
+        if tiebreakers[p[0]]["gw"] + tiebreakers[p[0]]["gl"] > 0:
+            tiebreakers[p[0]]["gwp"] = tiebreakers[p[0]]["gw"] / (tiebreakers[p[0]]["gw"] + tiebreakers[p[0]]["gl"])
+        else:
+            tiebreakers[p[0]]["gwp"] = 0
+
+    for p in players:
         omw = 0
         ogw = 0
         for op in tiebreakers[p[0]]["ops"]:
-            omw += max(tiebreakers[op]["mw"],1/3)
-            ogw += max(tiebreakers[op]["gw"],1/3)
+            omw += max(tiebreakers[op]["mwp"],1/3)
+            ogw += max(tiebreakers[op]["gwp"],1/3)
         if len(tiebreakers[p[0]]["ops"]) > 0:
             tiebreakers[p[0]]["omw"] = omw / len(tiebreakers[p[0]]["ops"])
             tiebreakers[p[0]]["ogw"] = ogw / len(tiebreakers[p[0]]["ops"])
@@ -157,10 +163,11 @@ async def get_players(interaction: discord.Interaction, tid: int, include_droppe
             tiebreakers[p[0]]["omw"] = 0
             tiebreakers[p[0]]["ogw"] = 0
 
-    def tiebreak(p):
-        return 8*tiebreakers[p[0]]["pts"] + 4*tiebreakers[p[0]]["omw"] + 2*tiebreakers[p[0]]["gw"] + tiebreakers[p[0]]["ogw"]
 
-    players.sort(key=tiebreak)
+    def tiebreak(p):
+        return 8*tiebreakers[p[0]]["pts"] + 4*tiebreakers[p[0]]["omw"] + 2*tiebreakers[p[0]]["gwp"] + tiebreakers[p[0]]["ogw"]
+
+    players.sort(key=tiebreak, reverse=True)
 
     MESSAGE_LIMIT = 1950
     message_strs = [""]
@@ -171,7 +178,7 @@ async def get_players(interaction: discord.Interaction, tid: int, include_droppe
         message_strs[page] = f"Here's a list of all the players in the {tournament} tournament:\n```ansi"
         for p in players:
             player_message_str = f"\n[1;34m{p[1]}[0;37m is {p[3]}-{p[4]}-{p[5]}."
-            player_message_str += "\nTiebreakers: {:.1%} OMW, {:.1%} GW, {:.1%} OGW".format(tiebreakers[p[0]]["omw"],tiebreakers[p[0]]["gw"],tiebreakers[p[0]]["ogw"])
+            player_message_str += "\nTiebreakers: {:.1%} OMW, {:.1%} GW, {:.1%} OGW".format(tiebreakers[p[0]]["omw"],tiebreakers[p[0]]["gwp"],tiebreakers[p[0]]["ogw"])
             if p[2]:
                 player_message_str += f"\nTheir decklist: {p[2]}."
             else:
