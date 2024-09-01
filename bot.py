@@ -451,6 +451,7 @@ async def report(interaction: discord.Interaction, tid: int, wins: int, losses: 
 Match result reported:<@{uid1}> {wins}-{losses} <@{uid2}>.
 """
     message = await channel.send(message_str)
+    await interaction.response.send_message("Reported!", ephemeral=True)
 
 
 
