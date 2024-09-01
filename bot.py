@@ -113,7 +113,7 @@ async def create_tournament(interaction: discord.Interaction, name: str, descrip
 )
 @app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
-async def get_players(interaction: discord.Interaction, tid: int, include_dropped: bool, publicize: bool):
+async def get_players(interaction: discord.Interaction, tid: int, include_dropped: bool):
     tournament = await _get_tournament(interaction, tid)
     if not tournament:
         return
@@ -123,24 +123,69 @@ async def get_players(interaction: discord.Interaction, tid: int, include_droppe
         query += " AND NOT dropped"
     players = _get_all_db(query)
 
-    message_str = ""
-    if len(players) == 0:
-        message_str = f"There are no players in {tournament} yet."
-    else:
-        message_str = f"Here's a list of all the players in the {tournament} tournament:\n```ansi"
-        for p in players:
-            message_str += f"\n[1;34m{p[1]}[0;34m (ID: {p[0]})[0;37m is {p[3]}-{p[4]}-{p[5]}."
-            if p[2]:
-                message_str += f"\nTheir decklist: {p[2]}."
-            else:
-                message_str += f"\nThey have [1;31mNOT[0;37m submitted their decklist."
-            if p[6]:
-                message_str += "\nThey have [1;31mDROPPED[0;37m."
-            message_str += "\n"
-        message_str += "```"
+    tiebreakers = dict()
 
-    print(message_str)
-    await interaction.response.send_message(message_str, ephemeral=(not publicize))
+    for p in players:
+        tiebreakers[p[0]] = {
+            "pts": p[3]*3 + p[5],
+            "mw": p[3]/(p[3]+p[4]+p[5]),
+            "gw": 0,
+            "gl": 0,
+            "ops": list()
+        }
+
+        for m in _get_all_db(f"SELECT pid2,wins1,wins2 FROM matches WHERE pid1={p[0]} AND tid={tid}"):
+            tiebreakers[p[0]]["ops"].append(m[0])
+            tiebreakers[p[0]]["gw"] += m[1]
+            tiebreakers[p[0]]["gl"] += m[2]
+        for m in _get_all_db(f"SELECT pid1,wins2,wins1 FROM matches WHERE pid2={p[0]} AND tid={tid}"):
+            tiebreakers[p[0]]["ops"].append(m[0])
+            tiebreakers[p[0]]["gw"] += m[1]
+            tiebreakers[p[0]]["gl"] += m[2]
+
+    for p in players:
+        omw = 0
+        ogw = 0
+        for op in tiebreakers[p[0]]["ops"]:
+            omw += max(tiebreakers[op]["mw"],1/3)
+            ogw += max(tiebreakers[op]["gw"],1/3)
+        tiebreakers[p[0]]["omw"] = omw / len(tiebreakers[p[0]]["ops"])
+        tiebreakers[p[0]]["ogw"] = ogw / len(tiebreakers[p[0]]["ops"])
+
+    def tiebreak(p):
+        return 8*tiebreakers[p[0]]["pts"] + 4*tiebreakers[p[0]]["omw"] + 2*tiebreakers[p[0]]["gw"] + tiebreakers[p[0]]["ogw"]
+
+    players.sort(key=tiebreak)
+
+    MESSAGE_LIMIT = 1950
+    message_strs = [""]
+    page = 0
+    if len(players) == 0:
+        message_strs[page] = f"There are no players in {tournament} yet."
+    else:
+        message_strs[page] = f"Here's a list of all the players in the {tournament} tournament:\n```ansi"
+        for p in players:
+            player_message_str = f"\n[1;34m{p[1]}[0;37m is {p[3]}-{p[4]}-{p[5]}."
+            player_message_str += "\nTiebreakers: {:.1%} OMW, {:.1%} GW, {:.1%} OGW".format(tiebreakers[p[0]]["omw"],tiebreakers[p[0]]["gw"],tiebreakers[p[0]]["ogw"])
+            if p[2]:
+                player_message_str += f"\nTheir decklist: {p[2]}."
+            else:
+                player_message_str += f"\nThey have [1;31mNOT[0;37m submitted their decklist."
+            if p[6]:
+                player_message_str += "\nThey have [1;31mDROPPED[0;37m."
+            player_message_str += "\n"
+
+            if len(message_strs[page]) + len(player_message_str) > MESSAGE_LIMIT:
+                message_strs[page] += "```"
+                page += 1
+                message_strs.append("```ansi")
+            message_strs[page] += player_message_str
+        message_strs[page] += "```"
+
+    for ms in message_strs:
+        interaction.channel.send(ms)
+
+    await interaction.response.send_message("Printed", ephemeral=True)
 
 
 
