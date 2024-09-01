@@ -165,7 +165,7 @@ async def get_players(interaction: discord.Interaction, tid: int, include_droppe
 
 
     def tiebreak(p):
-        return 8*tiebreakers[p[0]]["pts"] + 4*tiebreakers[p[0]]["omw"] + 2*tiebreakers[p[0]]["gwp"] + tiebreakers[p[0]]["ogw"]
+        return 1000000*tiebreakers[p[0]]["pts"] + 1000000*tiebreakers[p[0]]["omw"] + 1000*tiebreakers[p[0]]["gwp"] + tiebreakers[p[0]]["ogw"]
 
     players.sort(key=tiebreak, reverse=True)
 
