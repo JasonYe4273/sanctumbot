@@ -126,6 +126,7 @@ async def get_players(interaction: discord.Interaction, tid: int, include_droppe
     tiebreakers = dict()
 
     for p in players:
+        print(p)
         tiebreakers[p[0]] = {
             "pts": p[3]*3 + p[5],
             "mw": p[3]/(p[3]+p[4]+p[5]) if p[3]+[4]+p[5]>0 else 0,
