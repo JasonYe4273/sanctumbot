@@ -40,7 +40,7 @@ async def mythicscraper(client, setcode: str):
         img = re.search('(?<=src=\")(.*)(?=\">)', l).group()
 
         message = f"""<@&{role}> new spoiler! <https://www.mythicspoiler.com/{setcode}/{name_path}>
-  https://www.mythicspoiler.com/{setcode}/{img}.jpg
+  https://www.mythicspoiler.com/{setcode}/{img}
   """
         c: discord.TextChannel = client.get_channel(channel)
         await c.send(message)

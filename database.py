@@ -1,10 +1,10 @@
-import psycopg2  # type: ignore[import]
 try:
     from secrets import DATABASE_URL
 except:
     import os
     DATABASE_URL = os.environ.get('DATABASE_URL', '')
 
+import psycopg2  # type: ignore[import]
 con = psycopg2.connect(DATABASE_URL, sslmode='require')
 cur = con.cursor()
 
