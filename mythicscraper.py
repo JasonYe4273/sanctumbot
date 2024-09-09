@@ -27,24 +27,28 @@ async def mythicscraper(client, setcode: str):
       role = data[3]
 
     if 'class="card"' in l:
-      name = re.search("(?<=cards/)(.*)(?=.html)",l).group()
+      try:
+        name_path = re.search('(?<=href=\")(.*?)(?=\">)', l).group()
+        name = re.search('(?<=cards/)(.*?)(?=\.)', name_path).group()
 
-      # no repeats
-      cur.execute(f"SELECT * FROM scrapercards WHERE setcode='{setcode}' AND cardname='{name}'")
-      if cur.fetchone():
-        continue
+        # no repeats
+        cur.execute(f"SELECT * FROM scrapercards WHERE setcode='{setcode}' AND cardname='{name}'")
+        if cur.fetchone():
+          continue
 
-      print(f"FOUND NEW CARD: {name}")
-      img = re.search("(?<=cards/)(.*)(?=.jpg)",l).group()
+        print(f"FOUND NEW CARD: {name}")
+        img = re.search('(?<=src=\")(.*)(?=\">)', l).group()
 
-      message = f"""<@&{role}> new spoiler! <https://www.mythicspoiler.com/{setcode}/{name}.html>
-https://www.mythicspoiler.com/{setcode}/{img}.jpg
-"""
-      c: discord.TextChannel = client.get_channel(channel)
-      await c.send(message)
+        message = f"""<@&{role}> new spoiler! <https://www.mythicspoiler.com/{setcode}/{name_path}>
+  https://www.mythicspoiler.com/{setcode}/{img}.jpg
+  """
+        c: discord.TextChannel = client.get_channel(channel)
+        await c.send(message)
 
-      cur.execute(f"INSERT INTO scrapercards (setcode, cardname) VALUES ('{setcode}', '{name}')")
-      con.commit()
+        cur.execute(f"INSERT INTO scrapercards (setcode, cardname) VALUES ('{setcode}', '{name}')")
+        con.commit()
+      except:
+        pass
 
 
 
