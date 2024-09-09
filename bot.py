@@ -661,15 +661,27 @@ async def create_scraper(interaction: discord.Interaction, setcode: str):
     await interaction.response.send_message(f"{setcode} scraper created!", ephemeral=True)
 
 
+@tree.command(  # type: ignore[arg-type]
+    name="set_scraper_channel",
+    description="[ADMIN ONLY] Create a mythicspoiler scraper",
+    guild=discord.Object(id=SANCTUM_ID)
+)
+@app_commands.check(log_command)
+@app_commands.checks.has_permissions(administrator=True)
+async def set_scraper_channel(interaction: discord.Interaction, setcode: str):
+    _set_db(f"UPDATE scraperinfo SET channel={interaction.channel_id} WHERE setcode='{setcode}'")
+    await interaction.response.send_message(f"{setcode} scraper channel set!", ephemeral=True)
+
+
 
 @tree.command(  # type: ignore[arg-type]
-    name="scraper_alt",
+    name="set_scraper_alt",
     description="[ADMIN ONLY] Set a scraper's alt channel",
     guild=discord.Object(id=SANCTUM_ID)
 )
 @app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
-async def scraper_alt(interaction: discord.Interaction, setcode: str):
+async def set_scraper_alt(interaction: discord.Interaction, setcode: str):
     _set_db(f"UPDATE scraperinfo SET altchannel={interaction.channel_id} WHERE setcode='{setcode}'")
     await interaction.response.send_message(f"{setcode} scraper alt channel set!", ephemeral=True)
 

@@ -8,7 +8,7 @@ from database import con, cur
 async def mythicscraper(client, setcode: str):
   print(f"SCRAPING SET {setcode}")
 
-  cur.execute(f"SELECT (channel,altchannel,role,altrole,lastupdate) FROM scraperinfo WHERE setcode='{setcode}'")
+  cur.execute(f"SELECT (channel,altchannel,role,altrole) FROM scraperinfo WHERE setcode='{setcode}'")
   data = cur.fetchone()
   if not data:
     return
