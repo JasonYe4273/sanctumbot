@@ -39,9 +39,8 @@ async def mythicscraper(client, setcode: str):
         print(f"FOUND NEW CARD: {name}")
         img = re.search('(?<=src=\")(.*)(?=\">)', l).group()
 
-        message = f"""<@&{role}> new spoiler! <https://www.mythicspoiler.com/{setcode}/{name_path}>
-  https://www.mythicspoiler.com/{setcode}/{img}
-  """
+        message = f"""<@&{role}> [New spoiler!](<https://www.mythicspoiler.com/{setcode}/{name_path}>)
+[Image](https://www.mythicspoiler.com/{setcode}/{img})"""
         c: discord.TextChannel = client.get_channel(channel)
         await c.send(message)
 
