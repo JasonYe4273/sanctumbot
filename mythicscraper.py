@@ -50,6 +50,8 @@ async def mythicscraper(client, setcode: str):
       except:
         pass
 
+  print(f"DONE SCRAPING SET {setcode}")
+
 
 
 
