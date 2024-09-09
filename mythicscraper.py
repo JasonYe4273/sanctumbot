@@ -40,6 +40,8 @@ async def mythicscraper(client, setcode: str):
       message = f"""<@&{role}> new spoiler! <https://www.mythicspoiler.com/{setcode}/{name}.html>
 https://www.mythicspoiler.com/{setcode}/{img}.jpg
 """
+      print(client)
+      print(channel)
       c: discord.TextChannel = client.get_channel(channel)
       await c.send(message)
 
