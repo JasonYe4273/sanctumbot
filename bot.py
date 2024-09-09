@@ -654,7 +654,7 @@ async def scrape():
 )
 @app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
-async def create_scraper(interaction: discord.interaction, setcode: str, channelid: int, altchannelid: int, roleid: int, altroleid: int):
+async def create_scraper(interaction: discord.Interaction, setcode: str, channelid: int, altchannelid: int, roleid: int, altroleid: int):
     _set_db(f"INSERT INTO scraperinfo (setcode,channel,altchannel,role,altrole) VALUES ('{setcode}',{channelid},{altchannelid},{role},{altroleid})")
     await interaction.response.send_message(f"{setcode} scraper created!", ephemeral=True)
 
@@ -667,7 +667,7 @@ async def create_scraper(interaction: discord.interaction, setcode: str, channel
 )
 @app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
-async def delete_scraper(interaction: discord.interaction, setcode: str):
+async def delete_scraper(interaction: discord.Interaction, setcode: str):
     _set_db(f"DELETE FROM scraperinfo WHERE setcode='{setcode}'")
     await interaction.response.send_message(f"{setcode} scraper deleted!", ephemeral=True)
 
