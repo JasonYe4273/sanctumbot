@@ -72,3 +72,16 @@ cur.execute("""CREATE TABLE IF NOT EXISTS queue(
     REFERENCES players(pid)
 )""")
 con.commit()
+cur.execute("""CREATE TABLE IF NOT EXISTS scraperinfo(
+  setcode TEXT,
+  channel BIGINT NOT NULL,
+  altchannel BIGINT NOT NULL,
+  role BIGINT NOT NULL,
+  altrole BIGINT NOT NULL
+)""")
+con.commit()
+cur.execute("""CREATE TABLE IF NOT EXISTS scrapercards(
+  setcode TEXT,
+  cardname TEXT
+)""")
+con.commit()

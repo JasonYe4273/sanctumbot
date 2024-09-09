@@ -635,6 +635,45 @@ Here are your opponent's decklists:
 
 
 
+### MYTHICSCRAPER
+
+from mythicscraper import mythicscraper
+from discord.ext import tasks
+
+@tasks.loop(minutes=5.0)
+async def scrape():
+    scrapers = _get_all_db("SELECT setcode FROM scraperinfo")
+    for s in scrapers:
+        await mythicscraper(client, s[0])
+
+
+@tree.command(  # type: ignore[arg-type]
+    name="create_scraper",
+    description="[ADMIN ONLY] Create a mythicspoiler scraper",
+    guild=discord.Object(id=SANCTUM_ID)
+)
+@app_commands.check(log_command)
+@app_commands.checks.has_permissions(administrator=True)
+async def create_scraper(interaction: discord.interaction, setcode: str, channelid: int, altchannelid: int, roleid: int, altroleid: int):
+    _set_db(f"INSERT INTO scraperinfo (setcode,channel,altchannel,role,altrole) VALUES ('{setcode}',{channelid},{altchannelid},{role},{altroleid})")
+    await interaction.response.send_message(f"{setcode} scraper created!", ephemeral=True)
+
+
+
+@tree.command(  # type: ignore[arg-type]
+    name="delete_scraper",
+    description="[ADMIN ONLY] Delete a mythicspoiler scraper",
+    guild=discord.Object(id=SANCTUM_ID)
+)
+@app_commands.check(log_command)
+@app_commands.checks.has_permissions(administrator=True)
+async def delete_scraper(interaction: discord.interaction, setcode: str):
+    _set_db(f"DELETE FROM scraperinfo WHERE setcode='{setcode}'")
+    await interaction.response.send_message(f"{setcode} scraper deleted!", ephemeral=True)
+
+
+
+
 ### GENERAL BOT STUFF
 
 
