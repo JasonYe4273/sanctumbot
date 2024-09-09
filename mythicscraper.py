@@ -6,6 +6,8 @@ from database import con, cur
 
 
 async def mythicscraper(client, setcode: str):
+  print(f"SCRAPING SET {setcode}")
+
   cur.execute(f"SELECT (channel,altchannel,role,altrole,lastupdate) FROM scraperinfo WHERE setcode='{setcode}'")
   data = cur.fetchone()
   if not data:
@@ -32,6 +34,7 @@ async def mythicscraper(client, setcode: str):
       if cur.fetchone():
         continue
 
+      print(f"FOUND NEW CARD: {name}")
       img = re.search("(?<=cards/)(.*)(?=.jpg)",l).group()
 
       message = f"""<@&{role}> new spoiler! <https://www.mythicspoiler.com/{setcode}/{name}.html>

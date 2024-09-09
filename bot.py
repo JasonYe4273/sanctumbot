@@ -642,6 +642,7 @@ from discord.ext import tasks
 
 @tasks.loop(minutes=5.0)
 async def scrape():
+    print("Checking for scrapers...")
     scrapers = _get_all_db("SELECT setcode FROM scraperinfo")
     for s in scrapers:
         await mythicscraper(client, s[0])
@@ -655,6 +656,7 @@ async def scrape():
 @app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
 async def create_scraper(interaction: discord.Interaction, setcode: str):
+    # TODO: actual role handling, not just hardcoded
     _set_db(f"INSERT INTO scraperinfo (setcode,channel,altchannel,role,altrole) VALUES ('{setcode}',{interaction.channel_id},0,1282790401790578689,1282790483143299073)")
     await interaction.response.send_message(f"{setcode} scraper created!", ephemeral=True)
 
