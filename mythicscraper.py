@@ -70,7 +70,7 @@ async def mythicscraper(client, setcode: str):
           continue
 
         print(f"FOUND NEW CARD: {name}")
-        img = re.search('(?<=src=\")(.*)(?=\">)', l, flags=re.DOTALL).group().srip()
+        img = re.search('(?<=src=\")(.*)(?=\">)', l, flags=re.DOTALL).group().strip()
 
         message = f"""<@&{role}> [New spoiler!](<https://www.mythicspoiler.com/{name_path}>)
 [Image](https://www.mythicspoiler.com/{img})"""
