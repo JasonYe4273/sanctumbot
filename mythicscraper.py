@@ -52,35 +52,49 @@ async def mythicscraper(client, setcode: str):
   print(f"SCRAPING LATEST SPOILERS")
 
   resp = requests.get(f'https://www.mythicspoiler.com/newspoilers.html')
-  lines = resp.text.split('<!--CARD CARD CARD CARD CARD CARD CARD-->')
+  sections = resp.text.split('<!--BOLD')
 
-  for l in lines:
-    if 'class="grid-card"' in l:
-      try:
-        name_path = re.search('(?<=<div class=\"grid-card\"><a href=\")(.*?)(?=\">)', l, flags=re.DOTALL).group().strip()
-        name = re.search('(?<=cards/)(.*?)(?=\\.)', name_path).group()
+  for s in sections:
+    title = re.search('(?<=-->)(.*?)(?=<font class)', s, flags=re.DOTALL).group().strip()
 
-        # check set matches
-        if not name_path.startswith(setcode):
-          continue
+    if "-" in title:
+      alt = True
+      channel = data[1]
+      role = data[3]
+    else:
+      alt = False
+      channel = data[0]
+      role = data[2]
 
-        # no repeats
-        cur.execute(f"SELECT * FROM scrapercards WHERE setcode='{setcode}' AND cardname='{name}'")
-        if cur.fetchone():
-          continue
+    lines = s.split('<!--CARD CARD CARD CARD CARD CARD CARD-->')
 
-        print(f"FOUND NEW CARD: {name}")
-        img = re.search('(?<=src=\")(.*?)(?=\">)', l, flags=re.DOTALL).group().strip()
+    for l in lines:
+      if 'class="grid-card"' in l:
+        try:
+          name_path = re.search('(?<=<div class=\"grid-card\"><a href=\")(.*?)(?=\">)', l, flags=re.DOTALL).group().strip()
+          name = re.search('(?<=cards/)(.*?)(?=\\.)', name_path).group()
 
-        message = f"""<@&{role}> [New spoiler!](<https://www.mythicspoiler.com/{name_path}>)
-[Image](https://www.mythicspoiler.com/{img})"""
-        c: discord.TextChannel = client.get_channel(channel)
-        await c.send(message)
+          # check set matches, if not stop searching this section
+          if not name_path.startswith(setcode):
+            break
 
-        cur.execute(f"INSERT INTO scrapercards (setcode, cardname) VALUES ('{setcode}', '{name}')")
-        con.commit()
-      except:
-        pass
+          # no repeats
+          cur.execute(f"SELECT * FROM scrapercards WHERE setcode='{setcode}' AND cardname='{name}'")
+          if cur.fetchone():
+            continue
+
+          print(f"FOUND NEW CARD: {name}")
+          img = re.search('(?<=src=\")(.*?)(?=\">)', l, flags=re.DOTALL).group().strip()
+
+          message = f"""<@&{role}> [New spoiler!](<https://www.mythicspoiler.com/{name_path}>)
+  [Image](https://www.mythicspoiler.com/{img})"""
+          c: discord.TextChannel = client.get_channel(channel)
+          await c.send(message)
+
+          cur.execute(f"INSERT INTO scrapercards (setcode, cardname) VALUES ('{setcode}', '{name}')")
+          con.commit()
+        except:
+          pass
 
   print(f"DONE SCRAPING SET {setcode}")
 
