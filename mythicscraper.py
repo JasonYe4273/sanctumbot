@@ -15,7 +15,6 @@ async def mythicscraper(client, setcode: str):
 
   resp = requests.get(f'https://www.mythicspoiler.com/{setcode}/index.html')
   lines = resp.text.split('\n')
-  print(len(lines))
 
   alt = False
   channel = data[0]
@@ -42,6 +41,39 @@ async def mythicscraper(client, setcode: str):
 
         message = f"""<@&{role}> [New spoiler!](<https://www.mythicspoiler.com/{setcode}/{name_path}>)
 [Image](https://www.mythicspoiler.com/{setcode}/{img})"""
+        c: discord.TextChannel = client.get_channel(channel)
+        await c.send(message)
+
+        cur.execute(f"INSERT INTO scrapercards (setcode, cardname) VALUES ('{setcode}', '{name}')")
+        con.commit()
+      except:
+        pass
+
+  print(f"SCRAPING LATEST SPOILERS")
+
+  resp = requests.get(f'https://www.mythicspoiler.com/newspoilers.html')
+  lines = resp.text.split('<!--CARD CARD CARD CARD CARD CARD CARD-->')
+
+  for l in lines:
+    if 'class="grid-card"' in l:
+      try:
+        name_path = re.search('(?<=<div class=\"grid-card\"><a href=\")(.*?)(?=\">)', l, flags=re.DOTALL).group().strip()
+        name = re.search('(?<=cards/)(.*?)(?=\\.)', name_path).group()
+
+        # check set matches
+        if not name_path.startswith(setcode):
+          continue
+
+        # no repeats
+        cur.execute(f"SELECT * FROM scrapercards WHERE setcode='{setcode}' AND cardname='{name}'")
+        if cur.fetchone():
+          continue
+
+        print(f"FOUND NEW CARD: {name}")
+        img = re.search('(?<=src=\")(.*)(?=\">)', l, flags=re.DOTALL).group().srip()
+
+        message = f"""<@&{role}> [New spoiler!](<https://www.mythicspoiler.com/{name_path}>)
+[Image](https://www.mythicspoiler.com/{img})"""
         c: discord.TextChannel = client.get_channel(channel)
         await c.send(message)
 
