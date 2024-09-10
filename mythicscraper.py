@@ -15,6 +15,7 @@ async def mythicscraper(client, setcode: str):
 
   resp = requests.get(f'https://www.mythicspoiler.com/{setcode}/index.html')
   lines = resp.text.split('\n')
+  print(len(lines))
 
   alt = False
   channel = data[0]
@@ -29,7 +30,7 @@ async def mythicscraper(client, setcode: str):
     if 'class="card"' in l:
       try:
         name_path = re.search('(?<=href=\")(.*?)(?=\">)', l).group()
-        name = re.search('(?<=cards/)(.*?)(?=\.)', name_path).group()
+        name = re.search('(?<=cards/)(.*?)(?=\\.)', name_path).group()
 
         # no repeats
         cur.execute(f"SELECT * FROM scrapercards WHERE setcode='{setcode}' AND cardname='{name}'")
