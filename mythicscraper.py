@@ -54,23 +54,23 @@ async def mythicscraper(client, setcode: str):
   resp = requests.get(f'https://www.mythicspoiler.com/newspoilers.html')
   sections = resp.text.split('<!--BOLD')
 
-  for s in sections:
-    title = re.search('(?<=-->)(.*?)(?=<font class)', s, flags=re.DOTALL).group().strip()
+  try:
+    for s in sections[1:]:
+      title = re.search('(?<=-->)(.*?)(?=<font class)', s, flags=re.DOTALL).group().strip()
 
-    if "-" in title:
-      alt = True
-      channel = data[1]
-      role = data[3]
-    else:
-      alt = False
-      channel = data[0]
-      role = data[2]
+      if "-" in title:
+        alt = True
+        channel = data[1]
+        role = data[3]
+      else:
+        alt = False
+        channel = data[0]
+        role = data[2]
 
-    lines = s.split('<!--CARD CARD CARD CARD CARD CARD CARD-->')
+      lines = s.split('<!--CARD CARD CARD CARD CARD CARD CARD-->')
 
-    for l in lines:
-      if 'class="grid-card"' in l:
-        try:
+      for l in lines:
+        if 'class="grid-card"' in l:
           name_path = re.search('(?<=<div class=\"grid-card\"><a href=\")(.*?)(?=\">)', l, flags=re.DOTALL).group().strip()
           name = re.search('(?<=cards/)(.*?)(?=\\.)', name_path).group()
 
@@ -93,8 +93,8 @@ async def mythicscraper(client, setcode: str):
 
           cur.execute(f"INSERT INTO scrapercards (setcode, cardname) VALUES ('{setcode}', '{name}')")
           con.commit()
-        except:
-          pass
+  except:
+    pass
 
   print(f"DONE SCRAPING SET {setcode}")
 
