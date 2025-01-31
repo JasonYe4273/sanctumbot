@@ -736,7 +736,7 @@ async def hypergeo(interaction: discord.Interaction, deck_size: int, hits: int, 
             if N-K < n-i:
                 i += 1
                 continue
-            psubi = comb(K, i) * comb(N-K, n-i) / comb(N, n);
+            psubi = 100 * comb(K, i) * comb(N-K, n-i) / comb(N, n);
             if i < k:
                 lt += psubi
             if i == k:
