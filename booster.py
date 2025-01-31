@@ -1,4 +1,5 @@
 import json
+import requests
 from random import randint
 
 import discord
@@ -13,8 +14,7 @@ with open('data/sealed_basic_data.json') as json_data:
     if s["code"][-5:] == "draft" or s["code"][-4:] == "play":
       SEALED_DATA[s["code"]] = s
 
-with open('data/AllPrintings.json') as json_data:
-  CARDS = json.load(json_data)["data"]
+SET_CACHE = dict()  # type: ignore[var-annotated]
 
 
 @tree.command(  # type: ignore[arg-type]
@@ -27,7 +27,7 @@ async def p1p1(interaction: discord.Interaction, set_code: str):
   if code not in SEALED_DATA:
     code = f"{set_code.lower()}-draft"
     if code not in SEALED_DATA:
-      await send_error(interaction, f"Cannot find a draft set with code {set_code}")
+      await send_error(interaction, f"Cannot find a draft set with code {set_code.upper()}")
 
   boosters = SEALED_DATA[code]["boosters"]
   booster = boosters[0]
@@ -70,10 +70,19 @@ async def p1p1(interaction: discord.Interaction, set_code: str):
     pack += packlet
 
   set_cards = dict()
-  for c in CARDS[set_code.upper()]["cards"]:
-    set_cards[c["number"]] = c["name"]
+  if set_code.upper() in SET_CACHE:
+    set_cards = SET_CACHE[set_code.upper()]
+  else:
+    try:
+      resp = requests.get(f"https://mtgjson.com/api/v5/{set_code.upper()}.json")
+      for c in resp.json()["data"]["cards"]:
+        set_cards[c["number"]] = c["name"]
+    except:
+      await send_error(interaction, f"Error fetching card data")
+      pass
+    SET_CACHE[set_code.upper()] = set_cards
 
-  scryfall = f"https://scryfall.com/search?q=e%3D{set_code}+%28"
+  scryfall = f"https://scryfall.com/search?q=e%3D{set_code.upper()}+%28"
   pack_names: list[str] = []
   for i in range(len(pack)):
     cn = pack[i].split(":")[1]
