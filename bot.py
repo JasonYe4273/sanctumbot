@@ -3,7 +3,7 @@ from discord import app_commands
 from discord.ext import tasks
 
 from database import con, cur, _get_one_db, _get_all_db, _set_db
-from util import client, tree, send_error, TOKEN, SANCTUM_ID, PT_SERVER_ID
+from util import client, tree, send_error, TOKEN, TEST, SANCTUM, PT
 
 
 
@@ -51,9 +51,9 @@ async def scrape():
 
 @client.event
 async def on_ready():
-    await tree.sync()
-    await tree.sync(guild=discord.Object(id=SANCTUM_ID))
-    await tree.sync(guild=discord.Object(id=PT_SERVER_ID))
+    await tree.sync(guild=TEST)
+    await tree.sync(guild=SANCTUM)
+    await tree.sync(guild=PT)
     print("Ready!")
     scrape.start()
 
