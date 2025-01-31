@@ -708,8 +708,7 @@ async def delete_scraper(interaction: discord.Interaction, setcode: str):
 
 @tree.command(  # type: ignore[arg-type]
     name="hypergeo",
-    description="Hypergeometric calculator",
-    guild=discord.Object(id=PT_SERVER_ID)
+    description="Hypergeometric calculator"
 )
 async def hypergeo(interaction: discord.Interaction, deck_size: int, hits: int, looking_at: int, looking_for: int):
     N = deck_size
@@ -757,7 +756,6 @@ P(X ≥ {k}) = {gte:.2f}%
 P(X > {k}) = {gt:.2f}%```
 """
         await interaction.response.send_message(msg, ephemeral=False)
-
 
 
 
