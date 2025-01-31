@@ -15,6 +15,7 @@ def fetch_sealed_data():
     for s in resp.json():
       if s["code"][-5:] == "draft" or s["code"][-4:] == "play":
         SEALED_DATA[s["set_code"].upper()] = s
+    print("Fetched sealed_basic_data!")
     return True
   except:
     return False
@@ -27,6 +28,7 @@ SET_CACHE = dict()  # type: ignore[var-annotated]
     description="Pack 1 Pick 1 from the specified set",
     guilds=[discord.Object(id=SANCTUM_ID),discord.Object(id=PT_SERVER_ID)]
 )
+@app_commands.check(log_command)
 async def p1p1(interaction: discord.Interaction, set_code: str):
   if not SEALED_DATA:
     if not fetch_sealed_data():
@@ -84,6 +86,7 @@ async def p1p1(interaction: discord.Interaction, set_code: str):
   else:
     try:
       resp = requests.get(f"https://mtgjson.com/api/v5/{set_code}.json")
+      print(f"Fetched {set_code} JSON!")
       for c in resp.json()["data"]["cards"]:
         set_cards[c["number"]] = c["name"]
     except:
@@ -91,7 +94,7 @@ async def p1p1(interaction: discord.Interaction, set_code: str):
       return
     SET_CACHE[set_code] = set_cards
 
-  scryfall = f"https://scryfall.com/search?q=e%3D{set_code}+%28"
+  scryfall = f"https://scryfall.com/search?q=e%3D{set_code}+game%3Dpaper+%28"
   pack_names: list[str] = []
   for i in range(len(pack)):
     cn = pack[i].split(":")[1]

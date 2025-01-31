@@ -13,6 +13,7 @@ from database import _get_all_db, _get_one_db, _set_db
     description="Hypergeometric calculator",
     guilds=[discord.Object(id=SANCTUM_ID),discord.Object(id=PT_SERVER_ID)]
 )
+@app_commands.check(log_command)
 async def hypergeo(interaction: discord.Interaction, deck_size: int, hits: int, looking_at: int, looking_for: int):
     N = deck_size
     K = hits
