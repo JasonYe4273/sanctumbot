@@ -82,8 +82,69 @@ async def _get_pid(interaction: discord.Interaction, tid: int):
 
 
 
+### ALL SERVERS COMMANDS
 
-### ADMIN COMMANDS
+
+
+
+
+
+
+@tree.command(  # type: ignore[arg-type]
+    name="hypergeo",
+    description="Hypergeometric calculator"
+)
+async def hypergeo(interaction: discord.Interaction, deck_size: int, hits: int, looking_at: int, looking_for: int):
+    N = deck_size
+    K = hits
+    n = looking_at
+    k = looking_for
+    gt = 0.0
+    gte = 0.0
+    eq = 0.0
+    lte = 0.0
+    lt = 0.0
+
+    if n > N:
+        await send_error(interaction, "Invalid input; sample must be smaller than population")
+    elif K > N:
+        await send_error(interaction, "Invalid input; can't have more successes than population")
+    elif k > n:
+        await send_error(interaction, "Invalid input; can't have more successes than sample")
+    elif k > K:
+        await send_error(interaction, "Invalid input; can't have more successes than exist")
+    else:
+        i = 0;
+        while i <= n and i <= K:
+            if N-K < n-i:
+                i += 1
+                continue
+            psubi = 100 * comb(K, i) * comb(N-K, n-i) / comb(N, n);
+            if i < k:
+                lt += psubi
+            if i == k:
+                eq += psubi
+            if i > k:
+                gt += psubi
+            i += 1
+
+        lte = lt + eq
+        gte = gt + eq
+
+        msg = f"""
+__Hypergeometric for {k} out of {n} cards to be one of {K} hits in a deck of size {N}:__
+```P(X < {k}) = {lt:.2f}%
+P(X ≤ {k}) = {lte:.2f}%
+P(X = {k}) = {eq:.2f}%
+P(X ≥ {k}) = {gte:.2f}%
+P(X > {k}) = {gt:.2f}%```
+"""
+        await interaction.response.send_message(msg, ephemeral=False)
+
+
+
+
+### SANCTUM RC ADMIN COMMANDS
 
 
 
@@ -227,7 +288,7 @@ async def drop_player(interaction: discord.Interaction, tid: int, user: str):
 
 
 
-### ALL OTHER COMMANDS BELOW
+### SANCTUM RC COMMANDS
 
 
 
@@ -706,59 +767,6 @@ async def delete_scraper(interaction: discord.Interaction, setcode: str):
 
 
 
-@tree.command(  # type: ignore[arg-type]
-    name="hypergeo",
-    description="Hypergeometric calculator"
-)
-async def hypergeo(interaction: discord.Interaction, deck_size: int, hits: int, looking_at: int, looking_for: int):
-    N = deck_size
-    K = hits
-    n = looking_at
-    k = looking_for
-    gt = 0.0
-    gte = 0.0
-    eq = 0.0
-    lte = 0.0
-    lt = 0.0
-
-    if n > N:
-        await send_error(interaction, "Invalid input; sample must be smaller than population")
-    elif K > N:
-        await send_error(interaction, "Invalid input; can't have more successes than population")
-    elif k > n:
-        await send_error(interaction, "Invalid input; can't have more successes than sample")
-    elif k > K:
-        await send_error(interaction, "Invalid input; can't have more successes than exist")
-    else:
-        i = 0;
-        while i <= n and i <= K:
-            if N-K < n-i:
-                i += 1
-                continue
-            psubi = 100 * comb(K, i) * comb(N-K, n-i) / comb(N, n);
-            if i < k:
-                lt += psubi
-            if i == k:
-                eq += psubi
-            if i > k:
-                gt += psubi
-            i += 1
-
-        lte = lt + eq
-        gte = gt + eq
-
-        msg = f"""
-__Hypergeometric for {k} out of {n} cards to be one of {K} hits in a deck of size {N}:__
-```P(X < {k}) = {lt:.2f}%
-P(X ≤ {k}) = {lte:.2f}%
-P(X = {k}) = {eq:.2f}%
-P(X ≥ {k}) = {gte:.2f}%
-P(X > {k}) = {gt:.2f}%```
-"""
-        await interaction.response.send_message(msg, ephemeral=False)
-
-
-
 ### GENERAL BOT STUFF
 
 
@@ -792,6 +800,7 @@ async def on_reaction_add(reaction, user):
 
 @client.event
 async def on_ready():
+    await tree.sync()
     await tree.sync(guild=discord.Object(id=SANCTUM_ID))
     await tree.sync(guild=discord.Object(id=PT_SERVER_ID))
     print("Ready!")
