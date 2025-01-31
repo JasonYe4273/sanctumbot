@@ -4,7 +4,7 @@ import re
 import discord
 from discord import app_commands
 
-from util import client, tree, send_error, log_command, SANCTUM_ID
+from util import client, tree, send_error, log_command, SANCTUM
 from database import con, cur, _get_all_db, _get_one_db, _set_db
 
 
@@ -106,7 +106,7 @@ async def mythicscraper(client, setcode: str):
 @tree.command(  # type: ignore[arg-type]
     name="create_scraper",
     description="[ADMIN ONLY] Create a mythicspoiler scraper",
-    guild=discord.Object(id=SANCTUM_ID)
+    guild=SANCTUM
 )
 @app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
@@ -119,7 +119,7 @@ async def create_scraper(interaction: discord.Interaction, setcode: str):
 @tree.command(  # type: ignore[arg-type]
     name="set_scraper_channel",
     description="[ADMIN ONLY] Create a mythicspoiler scraper",
-    guild=discord.Object(id=SANCTUM_ID)
+    guild=SANCTUM
 )
 @app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
@@ -132,7 +132,7 @@ async def set_scraper_channel(interaction: discord.Interaction, setcode: str):
 @tree.command(  # type: ignore[arg-type]
     name="set_scraper_alt",
     description="[ADMIN ONLY] Set a scraper's alt channel",
-    guild=discord.Object(id=SANCTUM_ID)
+    guild=SANCTUM
 )
 @app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
@@ -145,7 +145,7 @@ async def set_scraper_alt(interaction: discord.Interaction, setcode: str):
 @tree.command(  # type: ignore[arg-type]
     name="delete_scraper",
     description="[ADMIN ONLY] Delete a mythicspoiler scraper",
-    guild=discord.Object(id=SANCTUM_ID)
+    guild=SANCTUM
 )
 @app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)

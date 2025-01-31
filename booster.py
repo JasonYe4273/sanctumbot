@@ -5,7 +5,7 @@ from random import randint
 import discord
 from discord import app_commands
 
-from util import client, tree, send_error, log_command, SANCTUM_ID, PT_SERVER_ID
+from util import client, tree, send_error, log_command, ALL
 from database import _get_all_db, _get_one_db, _set_db
 
 SEALED_DATA = dict()
@@ -27,7 +27,7 @@ SET_CACHE = dict()  # type: ignore[var-annotated]
 @tree.command(  # type: ignore[arg-type]
     name="p1p1",
     description="Pack 1 Pick 1 from the specified set",
-    guilds=[discord.Object(id=SANCTUM_ID),discord.Object(id=PT_SERVER_ID)]
+    guilds=ALL
 )
 @app_commands.check(log_command)
 async def p1p1(interaction: discord.Interaction, set_code: str):

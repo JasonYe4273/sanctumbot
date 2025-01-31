@@ -3,16 +3,22 @@ import discord
 from discord import app_commands
 
 try:
-    from secrets import TOKEN, BOT_ID, SANCTUM_ID
+    from secrets import TOKEN, BOT_ID, SANCTUM_ID, PT_SERVER_ID, TEST_ID  # type: ignore[attr-defined]
 except:
     TOKEN = os.environ.get('TOKEN', '')
     BOT_ID = os.environ.get('BOT_ID', '')
     SANCTUM_ID = os.environ.get('SANCTUM_ID', '')
     PT_SERVER_ID = os.environ.get('PT_SERVER_ID', '')
+    TEST_ID = os.environ.get('TEST_ID', '')
 
 intents = discord.Intents.default()
 client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
+
+SANCTUM = discord.Object(id=SANCTUM_ID)
+PT = discord.Object(id=PT_SERVER_ID)
+TEST = discord.Object(id=TEST_ID)
+ALL = [SANCTUM,PT,TEST]
 
 
 async def send_error(interaction: discord.Interaction, message: str):

@@ -3,7 +3,7 @@ from math import comb
 import discord
 from discord import app_commands
 
-from util import client, tree, send_error, log_command, SANCTUM_ID, PT_SERVER_ID
+from util import client, tree, send_error, log_command, ALL
 from database import _get_all_db, _get_one_db, _set_db
 
 
@@ -11,7 +11,7 @@ from database import _get_all_db, _get_one_db, _set_db
 @tree.command(  # type: ignore[arg-type]
     name="hypergeo",
     description="Hypergeometric calculator",
-    guilds=[discord.Object(id=SANCTUM_ID),discord.Object(id=PT_SERVER_ID)]
+    guilds=ALL
 )
 @app_commands.check(log_command)
 async def hypergeo(interaction: discord.Interaction, deck_size: int, hits: int, looking_at: int, looking_for: int):
