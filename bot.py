@@ -92,7 +92,8 @@ async def _get_pid(interaction: discord.Interaction, tid: int):
 
 @tree.command(  # type: ignore[arg-type]
     name="hypergeo",
-    description="Hypergeometric calculator"
+    description="Hypergeometric calculator",
+    guilds=[discord.Object(id=SANCTUM_ID),discord.Object(id=PT_SERVER_ID)]
 )
 async def hypergeo(interaction: discord.Interaction, deck_size: int, hits: int, looking_at: int, looking_for: int):
     N = deck_size
@@ -800,7 +801,6 @@ async def on_reaction_add(reaction, user):
 
 @client.event
 async def on_ready():
-    await tree.sync()
     await tree.sync(guild=discord.Object(id=SANCTUM_ID))
     await tree.sync(guild=discord.Object(id=PT_SERVER_ID))
     print("Ready!")
