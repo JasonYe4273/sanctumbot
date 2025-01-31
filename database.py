@@ -85,3 +85,31 @@ cur.execute("""CREATE TABLE IF NOT EXISTS scrapercards(
   cardname TEXT
 )""")
 con.commit()
+
+
+def _get_one_db(query_str: str):
+    try:
+        cur.execute(query_str)
+        return cur.fetchone()
+    except Exception as e:
+        cur.execute("ROLLBACK")
+        con.commit()
+        raise e
+
+def _get_all_db(query_str: str):
+    try:
+        cur.execute(query_str)
+        return cur.fetchall()
+    except Exception as e:
+        cur.execute("ROLLBACK")
+        con.commit()
+        raise e
+
+def _set_db(query_str: str):
+    try:
+        cur.execute(query_str)
+        con.commit()
+    except Exception as e:
+        cur.execute("ROLLBACK")
+        con.commit()
+        raise e
