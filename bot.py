@@ -795,6 +795,7 @@ async def on_reaction_add(reaction, user):
 @client.event
 async def on_ready():
     await tree.sync(guild=discord.Object(id=SANCTUM_ID))
+    await tree.sync(guild=discord.Object(id=PT_SERVER_ID))
     print("Ready!")
     scrape.start()
 
