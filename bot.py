@@ -1,4 +1,5 @@
 import os
+from math import comb
 import asyncio
 from datetime import datetime
 import discord
@@ -9,6 +10,7 @@ except:
     TOKEN = os.environ.get('TOKEN', '')
     BOT_ID = os.environ.get('BOT_ID', '')
     SANCTUM_ID = os.environ.get('SANCTUM_ID', '')
+    PT_SERVER_ID = os.environ.get('PT_SERVER_ID', '')
 from database import con, cur
 
 intents = discord.Intents.default()
@@ -697,6 +699,69 @@ async def set_scraper_alt(interaction: discord.Interaction, setcode: str):
 async def delete_scraper(interaction: discord.Interaction, setcode: str):
     _set_db(f"DELETE FROM scraperinfo WHERE setcode='{setcode}'")
     await interaction.response.send_message(f"{setcode} scraper deleted!", ephemeral=True)
+
+
+
+### PT COMMANDS
+
+
+
+@tree.command(  # type: ignore[arg-type]
+    name="hypergeo",
+    description="Hypergeometric calculator: chances for [looking_for] out of [looking_at] cards to be one of [hits] hits in a deck of size [deck_size].",
+    guild=discord.Object(id=SANCTUM_ID)
+)
+@tree.command(  # type: ignore[arg-type]
+    name="hypergeo",
+    description="Hypergeometric calculator",
+    guild=discord.Object(id=PT_SERVER_ID)
+)
+async def hypergeo(interaction: discord.Interaction, deck_size: int, hits: int, looking_at: int, looking_for: int):
+    N = deck_size
+    K = hits
+    n = looking_at
+    k = looking_for
+    gt = 0.0
+    gte = 0.0
+    eq = 0.0
+    lte = 0.0
+    lt = 0.0
+
+    if n > N:
+        await send_error(interaction, "Invalid input; sample must be smaller than population")
+    elif K > N:
+        await send_error(interaction, "Invalid input; can't have more successes than population")
+    elif k > n:
+        await send_error(interaction, "Invalid input; can't have more successes than sample")
+    elif k > K:
+        await send_error(interaction, "Invalid input; can't have more successes than exist")
+    else:
+        i = 0;
+        while i <= n and i <= K:
+            if N-K < n-i:
+                i += 1
+                continue
+            psubi = comb(K, i) * comb(N-K, n-i) / comb(N, n);
+            if i < k:
+                lt += psubi
+            if i == k:
+                eq += psubi
+            if i > k:
+                gt += psubi
+            i += 1
+
+        lte = lt + eq
+        gte = gt + eq
+
+        msg = f"""
+__Hypergeometric for {k} out of {n} cards to be one of {K} hits in a deck of size {N}:__
+```P(X < {k}) = {lt:.2f}%
+P(X ≤ {k}) = {lte:.2f}%
+P(X = {k}) = {eq:.2f}%
+P(X ≥ {k}) = {gte:.2f}%
+P(X > {k}) = {gt:.2f}%```
+"""
+        await interaction.response.send_message(msg, ephemeral=False)
 
 
 

@@ -28,8 +28,8 @@ async def mythicscraper(client, setcode: str):
 
     if 'class="card"' in l:
       try:
-        name_path = re.search('(?<=href=\")(.*?)(?=\">)', l).group()
-        name = re.search('(?<=cards/)(.*?)(?=\\.)', name_path).group()
+        name_path = re.search('(?<=href=\")(.*?)(?=\">)', l).group()  # type: ignore[union-attr]
+        name = re.search('(?<=cards/)(.*?)(?=\\.)', name_path).group()  # type: ignore[union-attr]
 
         # no repeats
         cur.execute(f"SELECT * FROM scrapercards WHERE setcode='{setcode}' AND cardname='{name}'")
@@ -37,7 +37,7 @@ async def mythicscraper(client, setcode: str):
           continue
 
         print(f"FOUND NEW CARD: {name}")
-        img = re.search('(?<=src=\")(.*?)(?=\">)', l).group()
+        img = re.search('(?<=src=\")(.*?)(?=\">)', l).group()  # type: ignore[union-attr]
 
         message = f"""<@&{role}> [New spoiler!](<https://www.mythicspoiler.com/{setcode}/{name_path}>)
 [Image](https://www.mythicspoiler.com/{setcode}/{img})"""
@@ -56,7 +56,7 @@ async def mythicscraper(client, setcode: str):
 
   try:
     for s in sections[1:]:
-      title = re.search('(?<=-->)(.*?)(?=<font class)', s, flags=re.DOTALL).group().strip()
+      title = re.search('(?<=-->)(.*?)(?=<font class)', s, flags=re.DOTALL).group().strip()  # type: ignore[union-attr]
 
       if "-" in title:
         alt = True
@@ -71,8 +71,8 @@ async def mythicscraper(client, setcode: str):
 
       for l in lines:
         if 'class="grid-card"' in l:
-          name_path = re.search('(?<=<div class=\"grid-card\"><a href=\")(.*?)(?=\">)', l, flags=re.DOTALL).group().strip()
-          name = re.search('(?<=cards/)(.*?)(?=\\.)', name_path).group()
+          name_path = re.search('(?<=<div class=\"grid-card\"><a href=\")(.*?)(?=\">)', l, flags=re.DOTALL).group().strip()  # type: ignore[union-attr]
+          name = re.search('(?<=cards/)(.*?)(?=\\.)', name_path).group()  # type: ignore[union-attr]
 
           # check set matches, if not stop searching this section
           if not name_path.startswith(setcode):
@@ -84,11 +84,11 @@ async def mythicscraper(client, setcode: str):
             continue
 
           print(f"FOUND NEW CARD: {name}")
-          img = re.search('(?<=src=\")(.*?)(?=\">)', l, flags=re.DOTALL).group().strip()
+          img = re.search('(?<=src=\")(.*?)(?=\">)', l, flags=re.DOTALL).group().strip()  # type: ignore[union-attr]
 
           message = f"""<@&{role}> [New spoiler!](<https://www.mythicspoiler.com/{name_path}>)
   [Image](https://www.mythicspoiler.com/{img})"""
-          c: discord.TextChannel = client.get_channel(channel)
+          c: discord.TextChannel = client.get_channel(channel)  # type: ignore[no-redef]
           await c.send(message)
 
           cur.execute(f"INSERT INTO scrapercards (setcode, cardname) VALUES ('{setcode}', '{name}')")
