@@ -708,11 +708,6 @@ async def delete_scraper(interaction: discord.Interaction, setcode: str):
 
 @tree.command(  # type: ignore[arg-type]
     name="hypergeo",
-    description="Hypergeometric calculator: chances for [looking_for] out of [looking_at] cards to be one of [hits] hits in a deck of size [deck_size].",
-    guild=discord.Object(id=SANCTUM_ID)
-)
-@tree.command(  # type: ignore[arg-type]
-    name="hypergeo",
     description="Hypergeometric calculator",
     guild=discord.Object(id=PT_SERVER_ID)
 )
