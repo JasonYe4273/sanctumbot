@@ -8,11 +8,16 @@ from discord import app_commands
 from util import client, tree, send_error, log_command, SANCTUM_ID, PT_SERVER_ID
 from database import _get_all_db, _get_one_db, _set_db
 
-with open('data/sealed_basic_data.json') as json_data:
-  SEALED_DATA = {}
-  for s in json.load(json_data):
-    if s["code"][-5:] == "draft" or s["code"][-4:] == "play":
-      SEALED_DATA[s["code"]] = s
+SEALED_DATA = dict()
+def fetch_sealed_data():
+  try:
+    resp = requests.get("https://raw.githubusercontent.com/taw/magic-sealed-data/refs/heads/master/sealed_basic_data.json")
+    for s in resp.json():
+      if s["code"][-5:] == "draft" or s["code"][-4:] == "play":
+        SEALED_DATA[s["code"].upper()] = s
+    return True
+  except:
+    return False
 
 SET_CACHE = dict()  # type: ignore[var-annotated]
 
@@ -23,15 +28,19 @@ SET_CACHE = dict()  # type: ignore[var-annotated]
     guilds=[discord.Object(id=SANCTUM_ID),discord.Object(id=PT_SERVER_ID)]
 )
 async def p1p1(interaction: discord.Interaction, set_code: str):
-  code = f"{set_code.lower()}-play"
-  if code not in SEALED_DATA:
-    code = f"{set_code.lower()}-draft"
-    if code not in SEALED_DATA:
-      await send_error(interaction, f"Cannot find a draft set with code {set_code.upper()}")
+  if not SEALED_DATA:
+    if not fetch_sealed_data():
+      await send_error(interaction, f"Error loading pack data")
+      return
 
-  boosters = SEALED_DATA[code]["boosters"]
+  set_code = set_code.upper()
+  if set_code not in SEALED_DATA:
+    await send_error(interaction, f"Cannot find a draft set with code {set_code}")
+    return
+
+  boosters = SEALED_DATA[set_code]["boosters"]
   booster = boosters[0]
-  sheets = SEALED_DATA[code]["sheets"]
+  sheets = SEALED_DATA[set_code]["sheets"]
 
   # select kind of booster
   total_weight = 0
@@ -70,25 +79,26 @@ async def p1p1(interaction: discord.Interaction, set_code: str):
     pack += packlet
 
   set_cards = dict()
-  if set_code.upper() in SET_CACHE:
-    set_cards = SET_CACHE[set_code.upper()]
+  if set_code in SET_CACHE:
+    set_cards = SET_CACHE[set_code]
   else:
     try:
-      resp = requests.get(f"https://mtgjson.com/api/v5/{set_code.upper()}.json")
+      resp = requests.get(f"https://mtgjson.com/api/v5/{set_code}.json")
       for c in resp.json()["data"]["cards"]:
         set_cards[c["number"]] = c["name"]
     except:
-      await send_error(interaction, f"Error fetching card data")
-      pass
-    SET_CACHE[set_code.upper()] = set_cards
+      await send_error(interaction, f"Error loading card data")
+      return
+    SET_CACHE[set_code] = set_cards
 
-  scryfall = f"https://scryfall.com/search?q=e%3D{set_code.upper()}+%28"
+  scryfall = f"https://scryfall.com/search?q=e%3D{set_code}+%28"
   pack_names: list[str] = []
   for i in range(len(pack)):
     cn = pack[i].split(":")[1]
     if cn not in set_cards:
       await send_error(interaction, f"Error generating pack")
-    pack_names[i] = set_cards[cn]
+      return
+    pack_names.append(set_cards[cn])
 
     if i == 0:
       scryfall += f"cn%3D{cn}"
@@ -96,7 +106,7 @@ async def p1p1(interaction: discord.Interaction, set_code: str):
       scryfall += f"+or+cn%3D{cn}"
   scryfall += "%29"
 
-  msg = f"[P1P1](<{scryfall}>) from {set_code.upper()}:\n```"
+  msg = f"[P1P1](<{scryfall}>) from {set_code}:\n```"
   for name in pack_names:
     msg += f"\n{name}"
   msg += "```"
