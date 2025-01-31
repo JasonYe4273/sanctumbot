@@ -45,7 +45,7 @@ async def scrape():
     print("Checking for scrapers...")
     scrapers = _get_all_db("SELECT setcode FROM scraperinfo")
     for s in scrapers:
-        await mythicscraper(client, s[0])
+        await mythicscraper.mythicscraper(client, s[0])
 
 
 @client.event
