@@ -3,7 +3,6 @@ import re
 
 import discord
 from discord import app_commands
-from discord.ext import tasks
 
 from util import client, tree, send_error, log_command, SANCTUM_ID
 from database import con, cur, _get_all_db, _get_one_db, _set_db
@@ -102,14 +101,6 @@ async def mythicscraper(client, setcode: str):
     pass
 
   print(f"DONE SCRAPING SET {setcode}")
-
-
-@tasks.loop(minutes=5.0)
-async def scrape():
-    print("Checking for scrapers...")
-    scrapers = _get_all_db("SELECT setcode FROM scraperinfo")
-    for s in scrapers:
-        await mythicscraper(client, s[0])
 
 
 @tree.command(  # type: ignore[arg-type]

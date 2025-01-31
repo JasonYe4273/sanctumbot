@@ -1,5 +1,6 @@
 import discord
 from discord import app_commands
+from discord.ext import tasks
 
 from database import con, cur, _get_one_db, _get_all_db, _set_db
 from util import client, tree, send_error, TOKEN, SANCTUM_ID, PT_SERVER_ID
@@ -37,6 +38,14 @@ async def on_reaction_add(reaction, user):
             del HANDLING[reaction.message.id]
             await _create_match(h["tid"], h["p1"]["pid"], h["p2"]["pid"])
             await reaction.message.delete()
+
+
+@tasks.loop(minutes=5.0)
+async def scrape():
+    print("Checking for scrapers...")
+    scrapers = _get_all_db("SELECT setcode FROM scraperinfo")
+    for s in scrapers:
+        await mythicscraper(client, s[0])
 
 
 @client.event
