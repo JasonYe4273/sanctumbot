@@ -99,7 +99,7 @@ async def p1p1(interaction: discord.Interaction, set_code: str):
   for i in range(len(pack)):
     cn = pack[i].split(":")[1]
     if cn not in set_cards:
-      await send_error(interaction, f"Error generating pack")
+      await send_error(interaction, f"Error: cannot find card with CN {cn}")
       return
     pack_names.append(set_cards[cn])
 
