@@ -50,6 +50,7 @@ async def scrape():
 
 @client.event
 async def on_ready():
+    await tree.sync()
     await tree.sync(guild=discord.Object(id=SANCTUM_ID))
     await tree.sync(guild=discord.Object(id=PT_SERVER_ID))
     print("Ready!")
