@@ -1,0 +1,98 @@
+import json
+from random import randint
+
+import discord
+from discord import app_commands
+
+from util import client, tree, send_error, log_command, SANCTUM_ID, PT_SERVER_ID
+from database import _get_all_db, _get_one_db, _set_db
+
+with open('data/sealed_basic_data.json') as json_data:
+  SEALED_DATA = {}
+  for s in json.load(json_data):
+    if s["code"][-5:] == "draft" or s["code"][-4:] == "play":
+      SEALED_DATA[s["code"]] = s
+
+with open('data/AllPrintings.json') as json_data:
+  CARDS = json.load(json_data)["data"]
+
+
+@tree.command(  # type: ignore[arg-type]
+    name="p1p1",
+    description="Pack 1 Pick 1 from the specified set",
+    guilds=[discord.Object(id=SANCTUM_ID),discord.Object(id=PT_SERVER_ID)]
+)
+async def p1p1(interaction: discord.Interaction, set_code: str):
+  code = f"{set_code.lower()}-play"
+  if code not in SEALED_DATA:
+    code = f"{set_code.lower()}-draft"
+    if code not in SEALED_DATA:
+      await send_error(interaction, f"Cannot find a draft set with code {set_code}")
+
+  boosters = SEALED_DATA[code]["boosters"]
+  booster = boosters[0]
+  sheets = SEALED_DATA[code]["sheets"]
+
+  # select kind of booster
+  total_weight = 0
+  for b in boosters:
+    total_weight += b["weight"]
+
+  r = randint(1,total_weight)
+  weight = 0
+  for b in boosters:
+    weight += b["weight"]
+    if r <= weight:
+      booster = b
+      break
+
+
+  # generate sheets
+  pack: list[str] = []
+  for s in booster["sheets"]:
+    # generate packlet for a group of sheets
+    packlet: list[str] = []
+    total_weight = sheets[s]["total_weight"]
+    for i in range(booster["sheets"][s]):
+      weight = 0
+      card = ""
+      r = randint(1, total_weight)
+      for c in sheets[s]["cards"]:
+        # duplicate protection within a group
+        if c in packlet:
+          continue
+        weight += sheets[s]["cards"][c]
+        if r <= weight:
+          total_weight -= sheets[s]["cards"][c]
+          card = c
+          break
+      packlet.append(card)
+    pack += packlet
+
+  set_cards = dict()
+  for c in CARDS[set_code.upper()]["cards"]:
+    set_cards[c["number"]] = c["name"]
+
+  scryfall = f"https://scryfall.com/search?q=e%3D{set_code}+%28"
+  pack_names: list[str] = []
+  for i in range(len(pack)):
+    cn = pack[i].split(":")[1]
+    if cn not in set_cards:
+      await send_error(interaction, f"Error generating pack")
+    pack_names[i] = set_cards[cn]
+
+    if i == 0:
+      scryfall += f"cn%3D{cn}"
+    else:
+      scryfall += f"+or+cn%3D{cn}"
+  scryfall += "%29"
+
+  msg = f"[P1P1](<{scryfall}>) from {set_code.upper()}:\n```"
+  for name in pack_names:
+    msg += f"\n{name}"
+  msg += "```"
+
+  await interaction.response.send_message(msg, ephemeral=False)
+
+
+

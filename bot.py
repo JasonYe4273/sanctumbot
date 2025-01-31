@@ -10,6 +10,7 @@ from util import client, tree, send_error, TOKEN, SANCTUM_ID, PT_SERVER_ID
 import misc
 import tournaments
 import mythicscraper
+import booster
 
 
 # General errors ala https://stackoverflow.com/questions/75812514/how-to-handle-app-command-errors-inside-cogs-discord-py

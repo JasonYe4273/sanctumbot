@@ -4,3 +4,4 @@ include/*
 lib/*
 pyvenv.cfg
 sanctum.db
+data/AllPrintings.json
