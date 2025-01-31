@@ -14,7 +14,7 @@ def fetch_sealed_data():
     resp = requests.get("https://raw.githubusercontent.com/taw/magic-sealed-data/refs/heads/master/sealed_basic_data.json")
     for s in resp.json():
       if s["code"][-5:] == "draft" or s["code"][-4:] == "play":
-        SEALED_DATA[s["code"].upper()] = s
+        SEALED_DATA[s["set_code"].upper()] = s
     return True
   except:
     return False
