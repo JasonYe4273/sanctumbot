@@ -19,6 +19,7 @@ def fetch_sealed_data():
     return True
   except:
     return False
+fetch_sealed_data()
 
 SET_CACHE = dict()  # type: ignore[var-annotated]
 
@@ -98,6 +99,8 @@ async def p1p1(interaction: discord.Interaction, set_code: str):
   pack_names: list[str] = []
   for i in range(len(pack)):
     cn = pack[i].split(":")[1]
+    if not cn.isdigit() and cn[:-1].isdigit():
+      cn = cn[:-1]
     if cn not in set_cards:
       await send_error(interaction, f"Error: cannot find card with CN {cn}")
       return
