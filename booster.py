@@ -11,10 +11,15 @@ from database import _get_all_db, _get_one_db, _set_db
 SEALED_DATA = dict()
 def fetch_sealed_data():
   try:
+    # TEMP DFT DATA
+    with open("dft.json") as f:
+      SEALED_DATA["DFT"] = json.load(f)
+
     resp = requests.get("https://raw.githubusercontent.com/taw/magic-sealed-data/refs/heads/master/sealed_basic_data.json")
     for s in resp.json():
       if s["code"][-5:] == "draft" or s["code"][-4:] == "play":
         SEALED_DATA[s["set_code"].upper()] = s
+
     print("Fetched sealed_basic_data!")
     return True
   except:
