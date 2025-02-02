@@ -158,10 +158,14 @@ async def get_p1p1_loops(interaction: discord.Interaction):
 @app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
 async def delete_p1p1_loop(interaction: discord.Interaction, setcode: str):
-    _set_db(f"DELETE FROM packtaskloop WHERE setcode='{setcode.upper()}' AND channel={interaction.channel_id}")
-    await interaction.response.send_message(f"All {setcode} p1p1 task loops deleted!", ephemeral=True)
+  _set_db(f"DELETE FROM packtaskloop WHERE setcode='{setcode.upper()}' AND channel={interaction.channel_id}")
+  await interaction.response.send_message(f"All {setcode} p1p1 task loops deleted!", ephemeral=True)
 
+  if interaction.channel_id in PACK_TASK_LOOPS and setcode in PACK_TASK_LOOPS[interaction.channel_id]:
+    for tl in PACK_TASK_LOOPS[interaction.channel_id][setcode]:
+      tl.stop()
 
+      
 
 @tree.command(  # type: ignore[arg-type]
     name="p1p1",
@@ -182,10 +186,18 @@ async def post_p1p1(setcode: str, channel: int):
     await c.send(msg)
 
 
+PACK_TASK_LOOPS = dict()  # type: ignore[var-annotated]
 def create_pack_taskloop(setcode: str, channel: int, minutes: int):
   async def p_task():
     await post_p1p1(setcode, channel)
   p_taskloop = tasks.loop(minutes=minutes)(p_task)
+
+  if channel not in PACK_TASK_LOOPS:
+    PACK_TASK_LOOPS[channel] = dict()
+  if setcode not in PACK_TASK_LOOPS[channel]:
+    PACK_TASK_LOOPS[channel][setcode] = list()
+  PACK_TASK_LOOPS[channel][setcode] = p_taskloop
+
   p_taskloop.start()
 
 
