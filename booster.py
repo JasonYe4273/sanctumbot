@@ -165,7 +165,7 @@ async def delete_p1p1_loop(interaction: discord.Interaction, setcode: str):
     for tl in PACK_TASK_LOOPS[interaction.channel_id][setcode]:
       tl.stop()
 
-      
+
 
 @tree.command(  # type: ignore[arg-type]
     name="p1p1",
@@ -179,17 +179,16 @@ async def p1p1(interaction: discord.Interaction, setcode: str):
   await interaction.response.send_message(msg, ephemeral=False)
 
 
-async def post_p1p1(setcode: str, channel: int):
-  msg = await generate_pack(None, setcode)
-  if msg:
-    c: discord.TextChannel = client.get_channel(channel)  # type: ignore[assignment]
-    await c.send(msg)
-
 
 PACK_TASK_LOOPS = dict()  # type: ignore[var-annotated]
 def create_pack_taskloop(setcode: str, channel: int, minutes: int):
   async def p_task():
-    await post_p1p1(setcode, channel)
+    msg = await generate_pack(None, setcode)
+    if msg:
+      c: discord.TextChannel = client.get_channel(channel)  # type: ignore[annotation-unchecked]
+      await c.send(msg)
+      print(f"Posted {setcode} P1P1 in #{channel.name}")
+      
   p_taskloop = tasks.loop(minutes=minutes)(p_task)
 
   if channel not in PACK_TASK_LOOPS:
