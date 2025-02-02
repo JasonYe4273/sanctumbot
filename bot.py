@@ -27,8 +27,8 @@ tree.on_error = on_tree_error  # type: ignore[method-assign]
 
 @client.event
 async def on_reaction_add(reaction, user):
-    if reaction.message.id in HANDLING:
-        h = HANDLING[reaction.message.id]
+    if reaction.message.id in tournaments.HANDLING:
+        h = tournaments.HANDLING[reaction.message.id]
 
         if user.id == h["p1"]["uid"]:
             h["p1"]["reacted"] = True
@@ -36,7 +36,7 @@ async def on_reaction_add(reaction, user):
             h["p2"]["reacted"] = True
 
         if h["p1"]["reacted"] and h["p2"]["reacted"]:
-            del HANDLING[reaction.message.id]
+            del tournaments.HANDLING[reaction.message.id]
             await _create_match(h["tid"], h["p1"]["pid"], h["p2"]["pid"])
             await reaction.message.delete()
 
