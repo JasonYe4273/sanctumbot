@@ -188,7 +188,7 @@ def create_pack_taskloop(setcode: str, channel: int, minutes: int):
     if msg:
       c: discord.TextChannel = client.get_channel(channel)  # type: ignore[annotation-unchecked]
       await c.send(msg)
-      print(f"Posted {setcode} P1P1 in #{channel.name}")
+      print(f"Posted {setcode} P1P1 in #{c.name}")
 
   p_taskloop = tasks.loop(minutes=minutes)(p_task)
 
