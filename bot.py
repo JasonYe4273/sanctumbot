@@ -59,10 +59,7 @@ async def on_ready():
 
     p1p1s = _get_all_db("SELECT setcode,channel,minutes FROM packtaskloop")
     for p in p1p1s:
-        async def p_task():
-            await booster.post_p1p1(p[0],p[1])
-        p_taskloop = tasks.loop(minutes=p[2])(p_task)
-        p_taskloop.start()
+        booster.create_pack_taskloop(p[0],p[1],p[2])
 
     print("Ready!")
 

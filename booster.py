@@ -5,6 +5,7 @@ from typing import Optional
 
 import discord
 from discord import app_commands
+from discord.ext import tasks
 
 from util import client, tree, send_error, log_command, ALL
 from database import _get_all_db, _get_one_db, _set_db
@@ -135,6 +136,20 @@ async def create_p1p1_loop(interaction: discord.Interaction, setcode: str, minut
     await interaction.response.send_message(f"{setcode} p1p1 task loop created!", ephemeral=True)
 
 
+
+@tree.command(  # type: ignore[arg-type]
+    name="delete_p1p1_loop",
+    description="[ADMIN ONLY] Delete all p1p1 task loops of a set from this channel",
+    guilds=ALL
+)
+@app_commands.check(log_command)
+@app_commands.checks.has_permissions(administrator=True)
+async def delete_p1p1_loop(interaction: discord.Interaction, setcode: str):
+    _set_db(f"DELETE FROM packtaskloop WHERE setcode='{setcode}' AND channel={interaction.channel_id}")
+    await interaction.response.send_message(f"All {setcode} p1p1 task loops deleted!", ephemeral=True)
+
+
+
 @tree.command(  # type: ignore[arg-type]
     name="p1p1",
     description="Pack 1 Pick 1 from the specified set",
@@ -152,6 +167,13 @@ async def post_p1p1(set_code: str, channel: int):
   if msg:
     c: discord.TextChannel = client.get_channel(channel)  # type: ignore[assignment]
     await c.send(msg)
+
+
+def create_pack_taskloop(set_code: str, channel: int, minutes: int):
+  async def p_task():
+    await post_p1p1(set_code, channel)
+  p_taskloop = tasks.loop(minutes=minutes)(p_task)
+  p_taskloop.start()
 
 
 
