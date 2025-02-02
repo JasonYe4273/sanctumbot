@@ -85,6 +85,12 @@ cur.execute("""CREATE TABLE IF NOT EXISTS scrapercards(
   cardname TEXT
 )""")
 con.commit()
+cur.execute("""CREATE TABLE IF NOT EXISTS packtaskloop(
+  setcode TEXT,
+  channel BIGINT NOT NULL,
+  minutes INT
+)""")
+con.commit()
 
 
 def _get_one_db(query_str: str):

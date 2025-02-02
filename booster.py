@@ -1,6 +1,7 @@
 import json
 import requests
 from random import randint
+from typing import Optional
 
 import discord
 from discord import app_commands
@@ -29,22 +30,18 @@ fetch_sealed_data()
 SET_CACHE = dict()  # type: ignore[var-annotated]
 
 
-@tree.command(  # type: ignore[arg-type]
-    name="p1p1",
-    description="Pack 1 Pick 1 from the specified set",
-    guilds=ALL
-)
-@app_commands.check(log_command)
-async def p1p1(interaction: discord.Interaction, set_code: str):
+async def generate_pack(interaction: Optional[discord.Interaction], set_code: str) -> str:
   if not SEALED_DATA:
     if not fetch_sealed_data():
-      await send_error(interaction, f"Error loading pack data")
-      return
+      if interaction:
+        await send_error(interaction, f"Error loading pack data")
+      return ""
 
   set_code = set_code.upper()
   if set_code not in SEALED_DATA:
-    await send_error(interaction, f"Cannot find a draft set with code {set_code}")
-    return
+    if interaction:
+      await send_error(interaction, f"Cannot find a draft set with code {set_code}")
+    return ""
 
   boosters = SEALED_DATA[set_code]["boosters"]
   booster = boosters[0]
@@ -96,8 +93,9 @@ async def p1p1(interaction: discord.Interaction, set_code: str):
       for c in resp.json()["data"]["cards"]:
         set_cards[c["number"]] = c["name"]
     except:
-      await send_error(interaction, f"Error loading card data")
-      return
+      if interaction:
+        await send_error(interaction, f"Error loading card data")
+      return ""
     SET_CACHE[set_code] = set_cards
 
   scryfall = f"https://scryfall.com/search?q=e%3D{set_code}+game%3Dpaper+%28"
@@ -107,8 +105,9 @@ async def p1p1(interaction: discord.Interaction, set_code: str):
     if not cn.isdigit() and cn[:-1].isdigit():
       cn = cn[:-1]
     if cn not in set_cards:
-      await send_error(interaction, f"Error: cannot find card with CN {cn}")
-      return
+      if interaction:
+        await send_error(interaction, f"Error: cannot find card with CN {cn}")
+      return ""
     pack_names.append(set_cards[cn])
 
     if i == 0:
@@ -121,8 +120,38 @@ async def p1p1(interaction: discord.Interaction, set_code: str):
   for name in pack_names:
     msg += f"\n{name}"
   msg += "```"
+  return msg
+
+
+@tree.command(  # type: ignore[arg-type]
+    name="create_p1p1_loop",
+    description="[ADMIN ONLY] Create a p1p1 task loop in this channel",
+    guilds=ALL
+)
+@app_commands.check(log_command)
+@app_commands.checks.has_permissions(administrator=True)
+async def create_p1p1_loop(interaction: discord.Interaction, setcode: str, minutes: int):
+    _set_db(f"INSERT INTO packtaskloop (setcode,channel,minutes) VALUES ('{setcode}',{interaction.channel_id},{minutes})")
+    await interaction.response.send_message(f"{setcode} p1p1 task loop created!", ephemeral=True)
+
+
+@tree.command(  # type: ignore[arg-type]
+    name="p1p1",
+    description="Pack 1 Pick 1 from the specified set",
+    guilds=ALL
+)
+@app_commands.check(log_command)
+async def p1p1(interaction: discord.Interaction, set_code: str):
+  msg = await generate_pack(interaction, set_code)
 
   await interaction.response.send_message(msg, ephemeral=False)
+
+
+async def post_p1p1(set_code: str, channel: int):
+  msg = await generate_pack(None, set_code)
+  if msg:
+    c: discord.TextChannel = client.get_channel(channel)  # type: ignore[assignment]
+    await c.send(msg)
 
 
 

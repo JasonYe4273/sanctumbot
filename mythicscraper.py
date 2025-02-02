@@ -105,7 +105,7 @@ async def mythicscraper(client, setcode: str):
 
 @tree.command(  # type: ignore[arg-type]
     name="create_scraper",
-    description="[ADMIN ONLY] Create a mythicspoiler scraper",
+    description="[ADMIN ONLY] Create a mythicspoiler scraper in this channel",
     guild=SANCTUM
 )
 @app_commands.check(log_command)
@@ -118,7 +118,7 @@ async def create_scraper(interaction: discord.Interaction, setcode: str):
 
 @tree.command(  # type: ignore[arg-type]
     name="set_scraper_channel",
-    description="[ADMIN ONLY] Create a mythicspoiler scraper",
+    description="[ADMIN ONLY] Set a scraper's channel",
     guild=SANCTUM
 )
 @app_commands.check(log_command)

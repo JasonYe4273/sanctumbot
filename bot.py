@@ -54,7 +54,15 @@ async def on_ready():
     await tree.sync(guild=TEST)
     await tree.sync(guild=SANCTUM)
     await tree.sync(guild=PT)
-    print("Ready!")
+
     scrape.start()
+
+    p1p1s = _get_all_db("SELECT setcode,channel,minutes FROM packtaskloop")
+    for p in p1p1s:
+        async def p_task():
+            await booster.post_p1p1(p[0],p[1])
+        p_taskloop = tasks.loop(minutes=p[2])(p_task)
+
+    print("Ready!")
 
 client.run(TOKEN)
