@@ -133,6 +133,7 @@ async def generate_pack(interaction: Optional[discord.Interaction], setcode: str
 @app_commands.checks.has_permissions(administrator=True)
 async def create_p1p1_loop(interaction: discord.Interaction, setcode: str, minutes: int):
     _set_db(f"INSERT INTO packtaskloop (setcode,channel,minutes) VALUES ('{setcode.upper()}',{interaction.channel_id},{minutes})")
+    create_pack_taskloop(setcode, interaction.channel_id, minutes)  # type: ignore[arg-type]
     await interaction.response.send_message(f"{setcode} p1p1 task loop created!", ephemeral=True)
 
 
@@ -188,7 +189,7 @@ def create_pack_taskloop(setcode: str, channel: int, minutes: int):
       c: discord.TextChannel = client.get_channel(channel)  # type: ignore[annotation-unchecked]
       await c.send(msg)
       print(f"Posted {setcode} P1P1 in #{channel.name}")
-      
+
   p_taskloop = tasks.loop(minutes=minutes)(p_task)
 
   if channel not in PACK_TASK_LOOPS:
