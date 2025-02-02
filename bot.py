@@ -62,6 +62,7 @@ async def on_ready():
         async def p_task():
             await booster.post_p1p1(p[0],p[1])
         p_taskloop = tasks.loop(minutes=p[2])(p_task)
+        p_taskloop.start()
 
     print("Ready!")
 
