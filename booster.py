@@ -138,16 +138,16 @@ async def create_p1p1_loop(interaction: discord.Interaction, setcode: str, minut
 
 
 
-@tree.command(  # type: ignore[arg-type]
-    name="get_p1p1_loops",
-    description="[ADMIN ONLY] See all p1p1 loops in this channel",
-    guilds=ALL
-)
-@app_commands.check(log_command)
-@app_commands.checks.has_permissions(administrator=True)
-async def get_p1p1_loops(interaction: discord.Interaction):
-    p1p1s = _get_all_db(f"SELECT setcode,channel,minutes FROM packtaskloop")
-    await interaction.response.send_message(str(p1p1s), ephemeral=True)
+# @tree.command(  # type: ignore[arg-type]
+#     name="get_p1p1_loops",
+#     description="[ADMIN ONLY] See all p1p1 loops in this channel",
+#     guilds=ALL
+# )
+# @app_commands.check(log_command)
+# @app_commands.checks.has_permissions(administrator=True)
+# async def get_p1p1_loops(interaction: discord.Interaction):
+#     p1p1s = _get_all_db(f"SELECT setcode,channel,minutes FROM packtaskloop")
+#     await interaction.response.send_message(str(p1p1s), ephemeral=True)
 
 
 
