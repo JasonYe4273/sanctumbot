@@ -20,7 +20,7 @@ def fetch_sealed_data():
     resp = requests.get("https://raw.githubusercontent.com/taw/magic-sealed-data/refs/heads/master/sealed_basic_data.json")
     for s in resp.json():
       if s["code"][-5:] == "draft" or s["code"][-4:] == "play":
-        SEALED_DATA[s["set_code"].upper()] = s
+        SEALED_DATA[s["setcode"].upper()] = s
 
     print("Fetched sealed_basic_data!")
     return True
@@ -31,22 +31,22 @@ fetch_sealed_data()
 SET_CACHE = dict()  # type: ignore[var-annotated]
 
 
-async def generate_pack(interaction: Optional[discord.Interaction], set_code: str) -> str:
+async def generate_pack(interaction: Optional[discord.Interaction], setcode: str) -> str:
   if not SEALED_DATA:
     if not fetch_sealed_data():
       if interaction:
         await send_error(interaction, f"Error loading pack data")
       return ""
 
-  set_code = set_code.upper()
-  if set_code not in SEALED_DATA:
+  setcode = setcode.upper()
+  if setcode not in SEALED_DATA:
     if interaction:
-      await send_error(interaction, f"Cannot find a draft set with code {set_code}")
+      await send_error(interaction, f"Cannot find a draft set with code {setcode}")
     return ""
 
-  boosters = SEALED_DATA[set_code]["boosters"]
+  boosters = SEALED_DATA[setcode]["boosters"]
   booster = boosters[0]
-  sheets = SEALED_DATA[set_code]["sheets"]
+  sheets = SEALED_DATA[setcode]["sheets"]
 
   # select kind of booster
   total_weight = 0
@@ -85,21 +85,21 @@ async def generate_pack(interaction: Optional[discord.Interaction], set_code: st
     pack += packlet
 
   set_cards = dict()
-  if set_code in SET_CACHE:
-    set_cards = SET_CACHE[set_code]
+  if setcode in SET_CACHE:
+    set_cards = SET_CACHE[setcode]
   else:
     try:
-      resp = requests.get(f"https://mtgjson.com/api/v5/{set_code}.json")
-      print(f"Fetched {set_code} JSON!")
+      resp = requests.get(f"https://mtgjson.com/api/v5/{setcode}.json")
+      print(f"Fetched {setcode} JSON!")
       for c in resp.json()["data"]["cards"]:
         set_cards[c["number"]] = c["name"]
     except:
       if interaction:
         await send_error(interaction, f"Error loading card data")
       return ""
-    SET_CACHE[set_code] = set_cards
+    SET_CACHE[setcode] = set_cards
 
-  scryfall = f"https://scryfall.com/search?q=e%3D{set_code}+game%3Dpaper+%28"
+  scryfall = f"https://scryfall.com/search?q=e%3D{setcode}+game%3Dpaper+%28"
   pack_names: list[str] = []
   for i in range(len(pack)):
     cn = pack[i].split(":")[1]
@@ -117,7 +117,7 @@ async def generate_pack(interaction: Optional[discord.Interaction], set_code: st
       scryfall += f"+or+cn%3D{cn}"
   scryfall += "%29"
 
-  msg = f"[P1P1](<{scryfall}>) from {set_code}:\n```"
+  msg = f"[P1P1](<{scryfall}>) from {setcode}:\n```"
   for name in pack_names:
     msg += f"\n{name}"
   msg += "```"
@@ -132,8 +132,21 @@ async def generate_pack(interaction: Optional[discord.Interaction], set_code: st
 @app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
 async def create_p1p1_loop(interaction: discord.Interaction, setcode: str, minutes: int):
-    _set_db(f"INSERT INTO packtaskloop (setcode,channel,minutes) VALUES ('{setcode}',{interaction.channel_id},{minutes})")
+    _set_db(f"INSERT INTO packtaskloop (setcode,channel,minutes) VALUES ('{setcode.upper()}',{interaction.channel_id},{minutes})")
     await interaction.response.send_message(f"{setcode} p1p1 task loop created!", ephemeral=True)
+
+
+
+@tree.command(  # type: ignore[arg-type]
+    name="get_p1p1_loops",
+    description="[ADMIN ONLY] See all p1p1 loops in this channel",
+    guilds=ALL
+)
+@app_commands.check(log_command)
+@app_commands.checks.has_permissions(administrator=True)
+async def get_p1p1_loops(interaction: discord.Interaction):
+    p1p1s = _get_all_db(f"SELECT setcode,channel,minutes FROM packtaskloop")
+    await interaction.response.send_message(str(p1p1s), ephemeral=True)
 
 
 
@@ -145,7 +158,7 @@ async def create_p1p1_loop(interaction: discord.Interaction, setcode: str, minut
 @app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
 async def delete_p1p1_loop(interaction: discord.Interaction, setcode: str):
-    _set_db(f"DELETE FROM packtaskloop WHERE setcode='{setcode}' AND channel={interaction.channel_id}")
+    _set_db(f"DELETE FROM packtaskloop WHERE setcode='{setcode.upper()}' AND channel={interaction.channel_id}")
     await interaction.response.send_message(f"All {setcode} p1p1 task loops deleted!", ephemeral=True)
 
 
@@ -156,22 +169,22 @@ async def delete_p1p1_loop(interaction: discord.Interaction, setcode: str):
     guilds=ALL
 )
 @app_commands.check(log_command)
-async def p1p1(interaction: discord.Interaction, set_code: str):
-  msg = await generate_pack(interaction, set_code)
+async def p1p1(interaction: discord.Interaction, setcode: str):
+  msg = await generate_pack(interaction, setcode)
 
   await interaction.response.send_message(msg, ephemeral=False)
 
 
-async def post_p1p1(set_code: str, channel: int):
-  msg = await generate_pack(None, set_code)
+async def post_p1p1(setcode: str, channel: int):
+  msg = await generate_pack(None, setcode)
   if msg:
     c: discord.TextChannel = client.get_channel(channel)  # type: ignore[assignment]
     await c.send(msg)
 
 
-def create_pack_taskloop(set_code: str, channel: int, minutes: int):
+def create_pack_taskloop(setcode: str, channel: int, minutes: int):
   async def p_task():
-    await post_p1p1(set_code, channel)
+    await post_p1p1(setcode, channel)
   p_taskloop = tasks.loop(minutes=minutes)(p_task)
   p_taskloop.start()
 
