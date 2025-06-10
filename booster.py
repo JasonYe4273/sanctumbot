@@ -104,6 +104,7 @@ async def generate_pack(interaction: Optional[discord.Interaction], setcode: str
           set_cards[c["number"]] = c["name"]
       except:
         if interaction:
+          print(f"error: {set_cn}")
           await send_error(interaction, f"Error loading card data")
         return ""
       SET_CACHE[set_] = set_cards
