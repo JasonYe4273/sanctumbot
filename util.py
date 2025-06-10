@@ -22,7 +22,7 @@ ALL = [SANCTUM,PT,TEST]
 
 
 async def send_error(interaction: discord.Interaction, message: str):
-    if interaction and not interaction.is_done():
+    if interaction and not interaction.response.is_done():
         await interaction.response.send_message(
             f"""```ansi
 [2;31m{message}[0m

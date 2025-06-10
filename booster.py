@@ -89,7 +89,7 @@ async def generate_pack(interaction: Optional[discord.Interaction], setcode: str
   pack_names: list[str] = []
   for i in range(len(pack)):
     set_cn = pack[i].split(":")
-    set_ = set_cn[0]
+    set_ = set_cn[0].upper()
     cn = set_cn[1]
 
     set_cards = dict()
