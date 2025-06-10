@@ -85,7 +85,7 @@ async def generate_pack(interaction: Optional[discord.Interaction], setcode: str
       packlet.append(card)
     pack += packlet
 
-  scryfall = f"https://scryfall.com/search?q=e%3D{setcode}+game%3Dpaper+%28"
+  scryfall = f"https://scryfall.com/search?q="
   pack_names: list[str] = []
   for i in range(len(pack)):
     set_cn = pack[i].split(":")
@@ -118,7 +118,7 @@ async def generate_pack(interaction: Optional[discord.Interaction], setcode: str
     pack_names.append(set_cards[cn])
 
     scryfall += f"%28cn%3D{cn}+e%3D{set_}%29"
-    if i > 0:
+    if i < len(pack)-1:
       scryfall += f"+or+"
 
   msg = f"[P1P1](<{scryfall}>) from {setcode}:\n```"
