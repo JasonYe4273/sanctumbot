@@ -19,7 +19,7 @@ def fetch_sealed_data():
 
     resp = requests.get("https://raw.githubusercontent.com/taw/magic-sealed-data/refs/heads/master/sealed_basic_data.json")
     for s in resp.json():
-      print(f"Fetching sealed data for set ${s}")
+      print(f"Fetching sealed data for set ${s['code']}")
       if s["code"][-5:] == "draft" or s["code"][-4:] == "play":
         SEALED_DATA[s["set_code"].upper()] = s
 
@@ -86,25 +86,28 @@ async def generate_pack(interaction: Optional[discord.Interaction], setcode: str
       packlet.append(card)
     pack += packlet
 
-  set_cards = dict()
-  if setcode in SET_CACHE:
-    set_cards = SET_CACHE[setcode]
-  else:
-    try:
-      resp = requests.get(f"https://mtgjson.com/api/v5/{setcode}.json")
-      print(f"Fetched {setcode} JSON!")
-      for c in resp.json()["data"]["cards"]:
-        set_cards[c["number"]] = c["name"]
-    except:
-      if interaction:
-        await send_error(interaction, f"Error loading card data")
-      return ""
-    SET_CACHE[setcode] = set_cards
-
   scryfall = f"https://scryfall.com/search?q=e%3D{setcode}+game%3Dpaper+%28"
   pack_names: list[str] = []
   for i in range(len(pack)):
-    cn = pack[i].split(":")[1]
+    set_cn = pack[i].split(":")
+    set_ = set_cn[0]
+    cn = set_cn[1]
+
+    set_cards = dict()
+    if set_ in SET_CACHE:
+      set_cards = SET_CACHE[set_]
+    else:
+      try:
+        resp = requests.get(f"https://mtgjson.com/api/v5/{set_}.json")
+        print(f"Fetched {set_} JSON!")
+        for c in resp.json()["data"]["cards"]:
+          set_cards[c["number"]] = c["name"]
+      except:
+        if interaction:
+          await send_error(interaction, f"Error loading card data")
+        return ""
+      SET_CACHE[set_] = set_cards
+
     if not cn.isdigit() and cn[:-1].isdigit():
       cn = cn[:-1]
     if cn not in set_cards:
@@ -113,11 +116,9 @@ async def generate_pack(interaction: Optional[discord.Interaction], setcode: str
       return ""
     pack_names.append(set_cards[cn])
 
-    if i == 0:
-      scryfall += f"cn%3D{cn}"
-    else:
-      scryfall += f"+or+cn%3D{cn}"
-  scryfall += "%29"
+    scryfall += f"%28cn%3D{cn}+e%3D{set_}%29"
+    if i > 0:
+      scryfall += f"+or+"
 
   msg = f"[P1P1](<{scryfall}>) from {setcode}:\n```"
   for name in pack_names:
