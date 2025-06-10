@@ -21,11 +21,12 @@ def fetch_sealed_data():
     for s in resp.json():
       print(f"Fetching sealed data for set ${s}")
       if s["code"][-5:] == "draft" or s["code"][-4:] == "play":
-        SEALED_DATA[s["setcode"].upper()] = s
+        SEALED_DATA[s["set_code"].upper()] = s
 
     print("Fetched sealed_basic_data!")
     return True
   except:
+    print("Failed to fetch sealed_basic_data")
     return False
 fetch_sealed_data()
 
