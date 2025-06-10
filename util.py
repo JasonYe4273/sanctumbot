@@ -22,12 +22,13 @@ ALL = [SANCTUM,PT,TEST]
 
 
 async def send_error(interaction: discord.Interaction, message: str):
-    await interaction.response.send_message(
-        f"""```ansi
+    if interaction and  and not interaction.is_done():
+        await interaction.response.send_message(
+            f"""```ansi
 [2;31m{message}[0m
 ```""",
-        ephemeral=True
-    )
+            ephemeral=True
+        )
 
 def log_command(interaction: discord.Interaction) -> bool:
     print(f"{str(interaction.user)} used /{interaction.command.name}")  # type: ignore[union-attr]
