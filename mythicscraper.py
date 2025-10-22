@@ -12,8 +12,7 @@ from database import con, cur, _get_all_db, _get_one_db, _set_db
 async def mythicscraper(client, setcode: str):
   print(f"SCRAPING SET {setcode}")
 
-  cur.execute(f"SELECT channel,altchannel,role,altrole FROM scraperinfo WHERE setcode='{setcode}'")
-  data = cur.fetchone()
+  data = _get_all_db(f"SELECT channel,altchannel,role,altrole FROM scraperinfo WHERE setcode='{setcode}'")
   if not data:
     return
 
@@ -21,14 +20,10 @@ async def mythicscraper(client, setcode: str):
   lines = resp.text.split('\n')
 
   alt = False
-  channel = data[0]
-  role = data[2]
   for l in lines:
     # all main set cards are above the first isolated section
     if 'ISOLATED SECTION' in l:
       alt = True
-      channel = data[1]
-      role = data[3]
 
     if 'class="card"' in l:
       try:
@@ -36,20 +31,19 @@ async def mythicscraper(client, setcode: str):
         name = re.search('(?<=cards/)(.*?)(?=\\.)', name_path).group()  # type: ignore[union-attr]
 
         # no repeats
-        cur.execute(f"SELECT * FROM scrapercards WHERE setcode='{setcode}' AND cardname='{name}'")
-        if cur.fetchone():
+        if _get_one_db(f"SELECT * FROM scrapercards WHERE setcode='{setcode}' AND cardname='{name}'"):
           continue
 
         print(f"FOUND NEW CARD: {name}")
         img = re.search('(?<=src=\")(.*?)(?=\">)', l).group()  # type: ignore[union-attr]
 
-        message = f"""<@&{role}> [New spoiler!](<https://www.mythicspoiler.com/{setcode}/{name_path}>)
-[Image](https://www.mythicspoiler.com/{setcode}/{img})"""
-        c: discord.TextChannel = client.get_channel(channel)
-        await c.send(message)
+        for d in data:
+          message = f"""<@&{role}> [New spoiler!](<https://www.mythicspoiler.com/{setcode}/{name_path}>)
+  [Image](https://www.mythicspoiler.com/{d[3] if alt else d[2]}/{img})"""
+          c: discord.TextChannel = client.get_channel(d[1] if alt else d[0])
+          await c.send(message)
 
-        cur.execute(f"INSERT INTO scrapercards (setcode, cardname) VALUES ('{setcode}', '{name}')")
-        con.commit()
+        _set_db(f"INSERT INTO scrapercards (setcode, cardname) VALUES ('{setcode}', '{name}')")
       except:
         pass
 
@@ -64,12 +58,8 @@ async def mythicscraper(client, setcode: str):
 
       if "-" in title:
         alt = True
-        channel = data[1]
-        role = data[3]
       else:
         alt = False
-        channel = data[0]
-        role = data[2]
 
       lines = s.split('<!--CARD CARD CARD CARD CARD CARD CARD-->')
 
@@ -83,20 +73,19 @@ async def mythicscraper(client, setcode: str):
             break
 
           # no repeats
-          cur.execute(f"SELECT * FROM scrapercards WHERE setcode='{setcode}' AND cardname='{name}'")
-          if cur.fetchone():
+          if _get_one_db(f"SELECT * FROM scrapercards WHERE setcode='{setcode}' AND cardname='{name}'"):
             continue
 
           print(f"FOUND NEW CARD: {name}")
           img = re.search('(?<=src=\")(.*?)(?=\">)', l, flags=re.DOTALL).group().strip()  # type: ignore[union-attr]
 
-          message = f"""<@&{role}> [New spoiler!](<https://www.mythicspoiler.com/{name_path}>)
-  [Image](https://www.mythicspoiler.com/{img})"""
-          c: discord.TextChannel = client.get_channel(channel)  # type: ignore[no-redef]
-          await c.send(message)
+          for d in data:
+            message = f"""<@&{d[3] if alt else d[2]}> [New spoiler!](<https://www.mythicspoiler.com/{name_path}>)
+    [Image](https://www.mythicspoiler.com/{img})"""
+            c: discord.TextChannel = client.get_channel(d[1] if alt else d[0])  # type: ignore[no-redef]
+            await c.send(message)
 
-          cur.execute(f"INSERT INTO scrapercards (setcode, cardname) VALUES ('{setcode}', '{name}')")
-          con.commit()
+          _set_db(f"INSERT INTO scrapercards (setcode, cardname) VALUES ('{setcode}', '{name}')")
   except:
     pass
 
