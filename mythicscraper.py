@@ -138,7 +138,7 @@ async def set_scraper_alt(interaction: discord.Interaction, setcode: str):
 )
 @app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
-async def set_scraper_alt(interaction: discord.Interaction, role: str):
+async def update_scraper_role(interaction: discord.Interaction, role: str):
     _set_db(f"UPDATE scraperinfo SET role={role} WHERE channel='{interaction.channel_id}'")
     _set_db(f"UPDATE scraperinfo SET altrole={role} WHERE altchannel='{interaction.channel_id}'")
     await interaction.response.send_message(f"Scraper ping role set for this channel!", ephemeral=True)

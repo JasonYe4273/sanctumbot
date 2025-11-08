@@ -13,9 +13,9 @@ from database import _get_all_db, _get_one_db, _set_db
 SEALED_DATA = dict()
 def fetch_sealed_data():
   try:
-    # TEMP DFT DATA
-    with open("dft.json") as f:
-      SEALED_DATA["DFT"] = json.load(f)
+    # TEMP TLA DATA
+    with open("tla.json") as f:
+      SEALED_DATA["TLA"] = json.load(f)
 
     resp = requests.get("https://raw.githubusercontent.com/taw/magic-sealed-data/refs/heads/master/sealed_basic_data.json")
     for s in resp.json():
@@ -112,10 +112,9 @@ async def generate_pack(interaction: Optional[discord.Interaction], setcode: str
     if not cn.isdigit() and cn[:-1].isdigit():
       cn = cn[:-1]
     if cn not in set_cards:
-      if interaction:
-        await send_error(interaction, f"Error: cannot find card with CN {cn}")
-      return ""
-    pack_names.append(set_cards[cn])
+      pack_names.append(pack[i])
+    else:
+      pack_names.append(set_cards[cn])
 
     scryfall += f"%28cn%3D{cn}+e%3D{set_}%29"
     if i < len(pack)-1:
