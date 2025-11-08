@@ -32,18 +32,18 @@ fetch_sealed_data()
 SET_CACHE = dict()  # type: ignore[var-annotated]
 
 
-async def generate_pack(interaction: Optional[discord.Interaction], setcode: str) -> str:
+async def generate_pack(interaction: Optional[discord.Interaction], setcode: str) -> list[list[str], str]:
   if not SEALED_DATA:
     if not fetch_sealed_data():
       if interaction:
         await send_error(interaction, f"Error loading pack data")
-      return ""
+      return []
 
   setcode = setcode.upper()
   if setcode not in SEALED_DATA:
     if interaction:
       await send_error(interaction, f"Cannot find a draft set with code {setcode}")
-    return ""
+    return []
 
   boosters = SEALED_DATA[setcode]["boosters"]
   booster = boosters[0]
@@ -106,13 +106,18 @@ async def generate_pack(interaction: Optional[discord.Interaction], setcode: str
         if interaction:
           print(f"error: {set_cn}")
           await send_error(interaction, f"Error loading card data")
-        return ""
+        return []
       SET_CACHE[set_] = set_cards
 
     if not cn.isdigit() and cn[:-1].isdigit():
       cn = cn[:-1]
     if cn not in set_cards:
-      pack_names.append(pack[i])
+      if set_cn == "tla:115":
+        pack_names.append("Pirate Peddlers")
+      elif set_cn == "tla:138":
+        pack_names.append("Firebending Lesson")
+      else:
+        pack_names.append(pack[i])
     else:
       pack_names.append(set_cards[cn])
 
