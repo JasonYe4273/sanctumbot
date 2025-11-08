@@ -112,11 +112,11 @@ async def generate_pack(interaction: Optional[discord.Interaction], setcode: str
     if not cn.isdigit() and cn[:-1].isdigit():
       cn = cn[:-1]
     if cn not in set_cards:
-      if set_cn == "tla:115":
+      if set_ == "tla" and cn == "115":
         pack_names.append("Pirate Peddlers")
-      elif set_cn == "tla:138":
+      elif set_ == "tla" and cn == "138":
         pack_names.append("Firebending Lesson")
-      elif set_cn == "tla:250":
+      elif set_ == "tla" and cn == "250":
         pack_names.append("Wandering Musicians")
       else:
         pack_names.append(pack[i])
