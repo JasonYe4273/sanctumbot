@@ -120,11 +120,7 @@ async def generate_pack(interaction: Optional[discord.Interaction], setcode: str
     if i < len(pack)-1:
       scryfall += f"+or+"
 
-  msg = f"[P1P1](<{scryfall}>) from {setcode}:\n```"
-  for name in pack_names:
-    msg += f"\n{name}"
-  msg += "```"
-  return msg
+  return [pack_names, scryfall]
 
 
 @tree.command(  # type: ignore[arg-type]
@@ -178,17 +174,51 @@ async def delete_p1p1_loop(interaction: discord.Interaction, setcode: str):
 )
 @app_commands.check(log_command)
 async def p1p1(interaction: discord.Interaction, setcode: str):
-  msg = await generate_pack(interaction, setcode)
+  pack = await generate_pack(interaction, setcode)
+  pack_names = pack[0]
+  scryfall = pack[1]
+
+  msg = f"[P1P1](<{scryfall}>) from {setcode}:\n```"
+  for name in pack_names:
+    msg += f"\n{name}"
+  msg += "```"
 
   await interaction.response.send_message(msg, ephemeral=False)
 
 
 
+@tree.command(  # type: ignore[arg-type]
+    name="generate_draft",
+    description="Generate 24 packs from the specified set",
+    guilds=ALL
+)
+@app_commands.check(log_command)
+@app_commands.checks.has_permissions(administrator=True)
+async def generate_draft(interaction: discord.Interaction, setcode: str):
+  msg = "||```"
+  for i in range(24):
+    pack = await generate_pack(interaction, setcode)
+    for name in pack[0]:
+      msg += f"\n{name}"
+    msg += "\n"
+  msg += "```||"
+
+  await interaction.response.send_message(msg, ephemeral=False)
+
+
 PACK_TASK_LOOPS = dict()  # type: ignore[var-annotated]
 def create_pack_taskloop(setcode: str, channel: int, minutes: int):
   async def p_task():
-    msg = await generate_pack(None, setcode)
-    if msg:
+    pack = await generate_pack(None, setcode)
+    if pack:
+      pack_names = pack[0]
+      scryfall = pack[1]
+
+      msg = f"[P1P1](<{scryfall}>) from {setcode}:\n```"
+      for name in pack_names:
+        msg += f"\n{name}"
+      msg += "```"
+
       c: discord.TextChannel = client.get_channel(channel)  # type: ignore[annotation-unchecked]
       await c.send(msg)
       print(f"Posted {setcode} P1P1 in #{c.name}")
