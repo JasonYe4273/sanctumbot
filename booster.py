@@ -116,6 +116,8 @@ async def generate_pack(interaction: Optional[discord.Interaction], setcode: str
         pack_names.append("Pirate Peddlers")
       elif set_cn == "tla:138":
         pack_names.append("Firebending Lesson")
+      elif set_cn == "tla:250":
+        pack_names.append("Wandering Musicians")
       else:
         pack_names.append(pack[i])
     else:
