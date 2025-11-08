@@ -193,9 +193,10 @@ async def p1p1(interaction: discord.Interaction, setcode: str):
     guilds=ALL
 )
 @app_commands.check(log_command)
-@app_commands.checks.has_permissions(administrator=True)
 async def generate_draft(interaction: discord.Interaction, setcode: str):
   with open("draft_boosters.txt", 'w') as f:
+    for i in range(100):
+      f.write('\n')
     for i in range(24):
       pack = await generate_pack(interaction, setcode)
       for name in pack[0]:
