@@ -114,6 +114,8 @@ async def generate_pack(interaction: Optional[discord.Interaction], setcode: str
     if cn not in set_cards:
       if set_ == "TLA" and cn == "115":
         pack_names.append("Pirate Peddlers")
+      elif set_ == "TLA" and cn == "123":
+        pack_names.append("Zuko's Conviction")
       elif set_ == "TLA" and cn == "138":
         pack_names.append("Firebending Lesson")
       elif set_ == "TLA" and cn == "250":
