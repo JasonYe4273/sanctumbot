@@ -4,7 +4,7 @@ import re
 import discord
 from discord import app_commands
 
-from util import client, tree, send_error, log_command, SANCTUM
+from util import client, tree, send_error, log_command, SANCTUM, ALL
 from database import con, cur, _get_all_db, _get_one_db, _set_db
 
 
@@ -95,7 +95,7 @@ async def mythicscraper(client, setcode: str):
 @tree.command(  # type: ignore[arg-type]
     name="create_scraper",
     description="[ADMIN ONLY] Create a mythicspoiler scraper in this channel",
-    guild=SANCTUM
+    guilds=ALL
 )
 @app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
@@ -108,7 +108,7 @@ async def create_scraper(interaction: discord.Interaction, setcode: str):
 @tree.command(  # type: ignore[arg-type]
     name="set_scraper_channel",
     description="[ADMIN ONLY] Set a scraper's channel",
-    guild=SANCTUM
+    guilds=ALL
 )
 @app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
@@ -121,7 +121,7 @@ async def set_scraper_channel(interaction: discord.Interaction, setcode: str):
 @tree.command(  # type: ignore[arg-type]
     name="set_scraper_alt",
     description="[ADMIN ONLY] Set a scraper's alt channel",
-    guild=SANCTUM
+    guilds=ALL
 )
 @app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
@@ -134,7 +134,7 @@ async def set_scraper_alt(interaction: discord.Interaction, setcode: str):
 @tree.command(  # type: ignore[arg-type]
     name="update_scraper_role",
     description="[ADMIN ONLY] Update this channel's ping role",
-    guild=SANCTUM
+    guilds=ALL
 )
 @app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
@@ -148,7 +148,7 @@ async def update_scraper_role(interaction: discord.Interaction, role: str):
 @tree.command(  # type: ignore[arg-type]
     name="delete_scraper",
     description="[ADMIN ONLY] Delete a mythicspoiler scraper",
-    guild=SANCTUM
+    guilds=ALL
 )
 @app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
