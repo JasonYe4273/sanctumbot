@@ -112,14 +112,24 @@ async def generate_pack(interaction: Optional[discord.Interaction], setcode: str
     if not cn.isdigit() and cn[:-1].isdigit():
       cn = cn[:-1]
     if cn not in set_cards:
-      if set_ == "TLA" and cn == "115":
+      if set_ == "TLA" and cn == "23":
+        pack_names.append("Hakoda, Selfless Commander")
+      elif set_ == "TLA" and cn == "81":
+        pack_names.append("Waterbending Scroll")
+      elif set_ == "TLA" and cn == "115":
         pack_names.append("Pirate Peddlers")
       elif set_ == "TLA" and cn == "123":
         pack_names.append("Zuko's Conviction")
       elif set_ == "TLA" and cn == "138":
         pack_names.append("Firebending Lesson")
+      elif set_ == "TLA" and cn == "160":
+        pack_names.append("Wartime Protestors")
+      elif set_ == "TLA" and cn == "239":
+        pack_names.append("Sandbender Scavengers")
       elif set_ == "TLA" and cn == "250":
         pack_names.append("Wandering Musicians")
+      elif set_ == "TLA" and cn == "276":
+        pack_names.append("Realm of Koh")
       else:
         pack_names.append(pack[i])
     else:
