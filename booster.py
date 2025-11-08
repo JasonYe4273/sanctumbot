@@ -195,15 +195,14 @@ async def p1p1(interaction: discord.Interaction, setcode: str):
 @app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
 async def generate_draft(interaction: discord.Interaction, setcode: str):
-  msg = "||```"
-  for i in range(24):
-    pack = await generate_pack(interaction, setcode)
-    for name in pack[0]:
-      msg += f"\n{name}"
-    msg += "\n"
-  msg += "```||"
+  with open("draft_boosters.txt", 'w') as f:
+    for i in range(24):
+      pack = await generate_pack(interaction, setcode)
+      for name in pack[0]:
+        f.write(f"{name}\n")
+      f.write('\n')
 
-  await interaction.response.send_message(msg, ephemeral=False)
+  await interaction.response.send_message("Generated draft!", file=discord.File("draft_boosters.txt"), ephemeral=False)
 
 
 PACK_TASK_LOOPS = dict()  # type: ignore[var-annotated]
