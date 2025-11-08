@@ -221,6 +221,8 @@ async def generate_draft(interaction: discord.Interaction, setcode: str):
       for name in pack[0]:
         f.write(f"{name}\n")
       f.write('\n')
+    for i in range(100):
+      f.write('\n')
 
   await interaction.response.send_message("Generated draft!", file=discord.File("draft_boosters.txt"), ephemeral=False)
 
