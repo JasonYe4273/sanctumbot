@@ -32,7 +32,7 @@ fetch_sealed_data()
 SET_CACHE = dict()  # type: ignore[var-annotated]
 
 
-async def generate_pack(interaction: Optional[discord.Interaction], setcode: str) -> Any:
+async def generate_pack(interaction: Optional[discord.Interaction], setcode: str) -> list:
   if not SEALED_DATA:
     if not fetch_sealed_data():
       if interaction:
