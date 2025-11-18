@@ -13,9 +13,9 @@ from database import _get_all_db, _get_one_db, _set_db
 SEALED_DATA = dict()
 def fetch_sealed_data():
   try:
-    # TEMP TLA DATA
-    with open("tla.json") as f:
-      SEALED_DATA["TLA"] = json.load(f)
+    # # TEMP TLA DATA
+    # with open("tla.json") as f:
+    #   SEALED_DATA["TLA"] = json.load(f)
 
     resp = requests.get("https://raw.githubusercontent.com/taw/magic-sealed-data/refs/heads/master/sealed_basic_data.json")
     for s in resp.json():
@@ -32,7 +32,7 @@ fetch_sealed_data()
 SET_CACHE = dict()  # type: ignore[var-annotated]
 
 
-async def generate_pack(interaction: Optional[discord.Interaction], setcode: str) -> list[list[str], str]:
+async def generate_pack(interaction: Optional[discord.Interaction], setcode: str) -> Any:
   if not SEALED_DATA:
     if not fetch_sealed_data():
       if interaction:
@@ -112,26 +112,7 @@ async def generate_pack(interaction: Optional[discord.Interaction], setcode: str
     if not cn.isdigit() and cn[:-1].isdigit():
       cn = cn[:-1]
     if cn not in set_cards:
-      if set_ == "TLA" and cn == "23":
-        pack_names.append("Hakoda, Selfless Commander")
-      elif set_ == "TLA" and cn == "81":
-        pack_names.append("Waterbending Scroll")
-      elif set_ == "TLA" and cn == "115":
-        pack_names.append("Pirate Peddlers")
-      elif set_ == "TLA" and cn == "123":
-        pack_names.append("Zuko's Conviction")
-      elif set_ == "TLA" and cn == "138":
-        pack_names.append("Firebending Lesson")
-      elif set_ == "TLA" and cn == "160":
-        pack_names.append("Wartime Protestors")
-      elif set_ == "TLA" and cn == "239":
-        pack_names.append("Sandbender Scavengers")
-      elif set_ == "TLA" and cn == "250":
-        pack_names.append("Wandering Musicians")
-      elif set_ == "TLA" and cn == "276":
-        pack_names.append("Realm of Koh")
-      else:
-        pack_names.append(pack[i])
+      pack_names.append(pack[i])
     else:
       pack_names.append(set_cards[cn])
 

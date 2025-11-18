@@ -10,6 +10,7 @@ except:
     SANCTUM_ID = os.environ.get('SANCTUM_ID', '')
     PT_SERVER_ID = os.environ.get('PT_SERVER_ID', '')
     TEST_ID = os.environ.get('TEST_ID', '')
+    DRAFT_ID = os.environ.get('DRAFT_ID', '')
 
 intents = discord.Intents.default()
 client = discord.Client(intents=intents)
@@ -18,7 +19,8 @@ tree = app_commands.CommandTree(client)
 SANCTUM = discord.Object(id=SANCTUM_ID)
 PT = discord.Object(id=PT_SERVER_ID)
 TEST = discord.Object(id=TEST_ID)
-ALL = [SANCTUM,PT,TEST]
+DRAFT = discord.Object(id=DRAFT_ID)
+ALL = [SANCTUM,PT,TEST,DRAFT]
 
 
 async def send_error(interaction: discord.Interaction, message: str):
