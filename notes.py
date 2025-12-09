@@ -19,8 +19,9 @@ async def notes(interaction: discord.Interaction, opponent: str, deck1: str, dec
     deck2 = deck2.lower()
 
     user = interaction.user
-    if user is discord.Member:
-        player = user.nick  # type: ignore[union-attr]
+    print(user)
+    if hasattr(user, 'nick'):
+        player = user.nick
     else:
         player = user.name
     msg = f"""# Notes for {player} on {deck1} vs {opponent} on {deck2}:
