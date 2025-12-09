@@ -18,7 +18,11 @@ async def notes(interaction: discord.Interaction, opponent: str, deck1: str, dec
     deck1 = deck1.lower()
     deck2 = deck2.lower()
 
-    player = str(interaction.user)
+    user = interaction.user
+    if user is discord.Member:
+        player = user.nick  # type: ignore[union-attr]
+    else:
+        player = user.name
     msg = f"""# Notes for {player} on {deck1} vs {opponent} on {deck2}:
 **RECORD**: {winloss} 
 """
