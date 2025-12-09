@@ -104,10 +104,10 @@ async def update_deck_names(server: int):
 
         decks = []
         for d in deck1s:
-            if d not in decks:
+            if d[0] not in decks:
                 decks.append(d[0])
         for d in deck2s:
-            if d not in decks:
+            if d[0] not in decks:
                 decks.append(d[0])
 
         msg = "# List of Deck Names:\n"
