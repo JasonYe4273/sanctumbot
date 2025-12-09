@@ -79,8 +79,8 @@ async def create_deck_names_pin(interaction: discord.Interaction):
     await interaction.response.send_message("Done!", ephemeral=True)
 
 async def update_deck_names(server: int):
-    mid = _get_one_db(f"SELECT message FROM deck_names WHERE server={server}")
-    cid = _get_one_db(f"SELECT channel FROM deck_names WHERE server={server}")
+    mid = _get_one_db(f"SELECT message FROM deck_names WHERE server={server}")[0]
+    cid = _get_one_db(f"SELECT channel FROM deck_names WHERE server={server}")[0]
     print(cid, mid)
     channel: discord.TextChannel = client.get_channel(cid)  # type: ignore[assignment]
     message: discord.Message = await channel.fetch_message(mid)
