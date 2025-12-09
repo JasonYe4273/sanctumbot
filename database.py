@@ -91,6 +91,17 @@ cur.execute("""CREATE TABLE IF NOT EXISTS packtaskloop(
   minutes INT
 )""")
 con.commit()
+cur.execute("""CREATE TABLE IF NOT EXISTS notes(
+  server BIGINT NOT NULL,
+  message TEXT NOT NULL,
+  player TEXT NOT NULL,
+  opponent TEXT NOT NULL,
+  deck1 TEXT NOT NULL,
+  deck2 TEXT NOT NULL,
+  winloss TEXT NOT NULL,
+  recorded_at BIGINT NOT NULL
+)""")
+con.commit()
 
 
 def _get_one_db(query_str: str):
