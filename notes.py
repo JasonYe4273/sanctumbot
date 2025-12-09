@@ -78,10 +78,23 @@ async def create_deck_names_pin(interaction: discord.Interaction):
 
     await interaction.response.send_message("Done!", ephemeral=True)
 
+
+@tree.command(  # type: ignore[arg-type]
+    name="reload_deck_names",
+    description="Reload pinned deck names message",
+    guilds=ALL
+)
+@app_commands.check(log_command)
+@app_commands.checks.has_permissions(administrator=True)
+async def reload_deck_names(interaction: discord.Interaction):
+    if interaction.guild_id:
+        await update_deck_names(interaction.guild_id)
+    await interaction.response.send_message("Done!", ephemeral=True)
+
+
 async def update_deck_names(server: int):
     mid = _get_one_db(f"SELECT message FROM deck_names WHERE server={server}")[0]
     cid = _get_one_db(f"SELECT channel FROM deck_names WHERE server={server}")[0]
-    print(cid, mid)
     channel: discord.TextChannel = client.get_channel(cid)  # type: ignore[assignment]
     message: discord.Message = await channel.fetch_message(mid)
 
@@ -92,10 +105,10 @@ async def update_deck_names(server: int):
         decks = []
         for d in deck1s:
             if d not in decks:
-                decks.append(d)
+                decks.append(d[0])
         for d in deck2s:
             if d not in decks:
-                decks.append(d)
+                decks.append(d[0])
 
         msg = "# List of Deck Names:\n"
         for d in decks:
