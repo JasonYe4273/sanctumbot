@@ -11,6 +11,7 @@ import misc
 import tournaments
 import mythicscraper
 import booster
+import notes
 
 
 # General errors ala https://stackoverflow.com/questions/75812514/how-to-handle-app-command-errors-inside-cogs-discord-py
