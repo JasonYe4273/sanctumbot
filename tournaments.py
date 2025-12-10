@@ -259,7 +259,7 @@ async def drop(interaction: discord.Interaction, tid: int):
 )
 @app_commands.check(log_command)
 async def registrations(interaction: discord.Interaction, include_dropped: bool):
-    registrations = _get_all_db(f"SELECT tournaments.tid,name,decklist,wins,losses,draws,dropped FROM players INNER JOIN tournaments ON players.tid=tournaments.tid WHERE username='{str(interaction.user)}'")
+    registrations = _get_all_db(f"SELECT tournaments.tid,name,decklist,wins,losses,draws,dropped,tournaments.active FROM players INNER JOIN tournaments ON players.tid=tournaments.tid WHERE tournaments.active AND username='{str(interaction.user)}'")
 
     message_str = "Here's a list of all of your current active player registrations:\n"
     for p in registrations:
