@@ -62,7 +62,7 @@ async def search_notes(interaction: discord.Interaction, deck: str):
 
 @tree.command(  # type: ignore[arg-type]
     name="create_deck_names_pin",
-    description="Create auto-updated message to pin as list of deck names",
+    description="[ADMIN-ONLY] Create auto-updated message to pin as list of deck names",
     guilds=ALL
 )
 @app_commands.check(log_command)
@@ -85,7 +85,7 @@ async def create_deck_names_pin(interaction: discord.Interaction):
 
 @tree.command(  # type: ignore[arg-type]
     name="reload_deck_names",
-    description="Reload pinned deck names message",
+    description="[ADMIN-ONLY] Reload pinned deck names message",
     guilds=ALL
 )
 @app_commands.check(log_command)

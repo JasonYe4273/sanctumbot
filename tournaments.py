@@ -4,7 +4,7 @@ from datetime import datetime
 import discord
 from discord import app_commands
 
-from util import client, tree, send_error, log_command, ALL
+from util import client, tree, send_error, log_command, PT, ALL
 from database import _get_all_db, _get_one_db, _set_db
 
 
@@ -32,7 +32,7 @@ async def _get_pid(interaction: discord.Interaction, tid: int):
 @tree.command(  # type: ignore[arg-type]
     name="create_tournament",
     description="[ADMIN ONLY] Create a tournament",
-    guilds=ALL
+    guild=PT
 )
 @app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
@@ -54,7 +54,7 @@ async def create_tournament(interaction: discord.Interaction, name: str, descrip
 @tree.command(  # type: ignore[arg-type]
     name="deactivate_tournament",
     description="[ADMIN ONLY] Deactivate a tournament",
-    guilds=ALL
+    guild=PT
 )
 @app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
@@ -67,7 +67,7 @@ async def deactivate_tournament(interaction: discord.Interaction, tid: int):
 @tree.command(  # type: ignore[arg-type]
     name="get_players",
     description="[ADMIN ONLY] Get the table of all players in a tournament",
-    guilds=ALL
+    guild=PT
 )
 @app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
@@ -162,7 +162,7 @@ async def get_players(interaction: discord.Interaction, tid: int, include_droppe
 @tree.command(  # type: ignore[arg-type]
     name="drop_player",
     description="[ADMIN ONLY] Drop a player from a tournament",
-    guilds=ALL
+    guild=PT
 )
 @app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
@@ -188,7 +188,7 @@ async def drop_player(interaction: discord.Interaction, tid: int, user: str):
 @tree.command(  # type: ignore[arg-type]
     name="tournaments",
     description="Get a list of tournaments",
-    guilds=ALL
+    guild=PT
 )
 @app_commands.check(log_command)
 async def tournaments(interaction: discord.Interaction):
@@ -206,7 +206,7 @@ async def tournaments(interaction: discord.Interaction):
 @tree.command(  # type: ignore[arg-type]
     name="register",
     description="Register for a tournament",
-    guilds=ALL
+    guild=PT
 )
 @app_commands.check(log_command)
 async def register(interaction: discord.Interaction, tid: int):
@@ -233,7 +233,7 @@ async def register(interaction: discord.Interaction, tid: int):
 @tree.command(  # type: ignore[arg-type]
     name="drop",
     description="Drop from a tournament",
-    guilds=ALL
+    guild=PT
 )
 @app_commands.check(log_command)
 async def drop(interaction: discord.Interaction, tid: int):
@@ -255,7 +255,7 @@ async def drop(interaction: discord.Interaction, tid: int):
 @tree.command(  # type: ignore[arg-type]
     name="registrations",
     description="Find all of your tournament registrations",
-    guilds=ALL
+    guild=PT
 )
 @app_commands.check(log_command)
 async def registrations(interaction: discord.Interaction, include_dropped: bool):
@@ -281,7 +281,7 @@ async def registrations(interaction: discord.Interaction, include_dropped: bool)
 @tree.command(  # type: ignore[arg-type]
     name="submitdeck",
     description="Submit your decklist for tournament",
-    guilds=ALL
+    guild=PT
 )
 @app_commands.check(log_command)
 async def submitdeck(interaction: discord.Interaction, tid: int, decklist: str):
@@ -305,7 +305,7 @@ HANDLING = dict()  # type: ignore[var-annotated]
 @tree.command(  # type: ignore[arg-type]
     name="lfg",
     description="Join the 'looking for games' queue",
-    guilds=ALL
+    guild=PT
 )
 @app_commands.check(log_command)
 async def lfg(interaction: discord.Interaction, tid: int):
@@ -360,7 +360,7 @@ async def lfg(interaction: discord.Interaction, tid: int):
 @tree.command(  # type: ignore[arg-type]
     name="leave",
     description="Leave the 'looking for games' queue",
-    guilds=ALL
+    guild=PT
 )
 @app_commands.check(log_command)
 async def leave(interaction: discord.Interaction, tid: int):
@@ -387,7 +387,7 @@ async def leave(interaction: discord.Interaction, tid: int):
 @tree.command(  # type: ignore[arg-type]
     name="queue",
     description="Show the 'looking for games' queue",
-    guilds=ALL
+    guild=PT
 )
 @app_commands.check(log_command)
 async def queue(interaction: discord.Interaction, tid: int):
@@ -409,7 +409,7 @@ async def queue(interaction: discord.Interaction, tid: int):
 @tree.command(  # type: ignore[arg-type]
     name="report",
     description="Report a match result",
-    guilds=ALL
+    guild=PT
 )
 @app_commands.check(log_command)
 async def report(interaction: discord.Interaction, tid: int, wins: int, losses: int):
