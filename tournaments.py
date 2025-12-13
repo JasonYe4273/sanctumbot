@@ -52,6 +52,20 @@ async def create_tournament(interaction: discord.Interaction, name: str, descrip
 
 
 @tree.command(  # type: ignore[arg-type]
+    name="update_tournament_start",
+    description="[ADMIN ONLY] Update a tournament start time",
+    guild=PT
+)
+@app_commands.check(log_command)
+@app_commands.checks.has_permissions(administrator=True)
+async def update_tournament_start(interaction: discord.Interaction, tid: int, start: int):
+    _set_db(f"UPDATE tournaments SET start_time={start} WHERE tid={tid}")
+
+    await interaction.response.send_message("Updated!", ephemeral=True)
+
+
+
+@tree.command(  # type: ignore[arg-type]
     name="deactivate_tournament",
     description="[ADMIN ONLY] Deactivate a tournament",
     guild=PT
