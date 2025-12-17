@@ -142,7 +142,11 @@ async def mana(interaction: discord.Interaction, cost: str):
 
         pcost = str(generic) + "C"*len(pips)
         if pcost in KARSTEN:
-            msg += f"and __**{KARSTEN[pcost]} sources of all {len(reqs)}**__  "
+            count = f"all {len(reqs)}"
+            if len(reqs) == 2:
+                count = "both"
+
+            msg += f"and __**{KARSTEN[pcost]} sources of {count}**__  "
 
         await interaction.response.send_message(msg[:-2]+f" for a cost of {cost}", ephemeral=True)
 
