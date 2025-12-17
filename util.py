@@ -12,7 +12,7 @@ except:
     TEST_ID = os.environ.get('TEST_ID', '')
     DRAFT_ID = os.environ.get('DRAFT_ID', '')
 
-intents = discord.Intents.default()
+intents = discord.Intents.all()
 client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
 
