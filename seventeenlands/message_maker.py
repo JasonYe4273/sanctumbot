@@ -6,7 +6,7 @@ from datetime import date
 from seventeenlands.CardParseData import MessageParseData, CardParseData
 from seventeenlands.utils.settings import SETS
 from seventeenlands.utils.consts import COMMAND_STR
-from seventeenlands.embed_maker import gen_card_embed, supported_color_strings
+from seventeenlands.embed_maker import gen_card_embed, supported_color_strings, how_to_query_17lands
 from seventeenlands.DataCache import DataCache
 
 
@@ -43,7 +43,7 @@ async def handle_command(message: str, channel):
     if command == 'colors':
         await send_embed_message(channel, supported_color_strings())
     elif command == 'help':
-        await send_message(channel, 'Read the README here: <https://github.com/JasonYe4273/17lands-helper>')
+        await send_message(channel, how_to_query_17lands())
     elif command == 'code':
         await send_message(channel, '<https://github.com/JasonYe4273/17lands-helper>')
     else:

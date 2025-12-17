@@ -129,6 +129,26 @@ def new_help_embed(title: str, description: str = "") -> discord.Embed:
     return embed
 
 
+# Returns an embed which instructs on how to query 17lands with the bot
+def how_to_query_17lands() -> discord.Embed:
+    """
+    Generates a discord embed which outlines how to query 17lands with the bot
+    """
+    return new_help_embed(
+        title="How to query 17lands",
+        description="""This bot will automatically detect cards queried in a similar way as Scryfall bot does: queries should be formatted as `{{cardnames | options}}.`
+
+Multiple cards may be queried at once; use spaces between card names to do so. If a card name has spaces, it must be enclosed by quotes. Capitalization and completeness are not necessary. (Example: {{"cut dow" MURDER "for the throa"}})
+
+All additional options specified must be separated by spaces. Options include:
+- **Format**: specify format(s) (bo1, bo3, etc) with a comma separated list preceded by `-f=`. Default is Bo1.
+- **Deck color filter**: filter by color(s) of deck by supplying a color combination preceded by `-c=`. Default is no filter.
+- **Time Periods**: the period of time to query about can be set with `-e=` to set the end date for your time range, and `-d=` to specify the number of days you want to query over. Default is to query all time up to the present.
+""",
+    )
+
+
+
 # Returns an embed which lists all of the strings which can be parsed into color strings.
 def supported_color_strings() -> discord.Embed:
     """
