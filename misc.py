@@ -114,7 +114,7 @@ async def mana(interaction: discord.Interaction, cost: str):
         "C": 0
     }
     for p in pips:
-        if p not in "wubrgc":
+        if p not in uniquepips:
             await send_error(interaction, f"Cannot parse mana cost {cost}")
             return
         uniquepips[p] += 1
