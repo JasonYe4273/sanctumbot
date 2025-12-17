@@ -60,3 +60,84 @@ P(X ≥ {k}) = {gte:.2f}%
 P(X > {k}) = {gt:.2f}%```
 """
         await interaction.response.send_message(msg, ephemeral=False)
+
+
+
+
+@tree.command(  # type: ignore[arg-type]
+    name="mana",
+    description="Karsten mana number for this mana cost",
+    guilds=ALL
+)
+@app_commands.check(log_command)
+async def mana(interaction: discord.Interaction, cost: str):
+    KARSTEN = {
+        "5C": 9,
+        "4C": 9,
+        "3C": 10,
+        "2C": 12,
+        "5CC": 12,
+        "1C": 13,
+        "4CC": 13,
+        "C": 14,
+        "3CC": 15,
+        "4CCC": 16,
+        "2CC": 16,
+        "1CC": 18,
+        "2CCC": 19,
+        "CC": 21,
+        "1CCC": 21,
+        "1CCCC": 22,
+        "CCC": 23,
+        "CCCC": 24
+    }
+
+    genericidx = 0
+    for i in range(len(cost)):
+        if not cost[:(i+1)].isnumeric():
+            genericidx = i+1
+            break
+
+    generic = int(cost[:genericidx])
+    pips = cost[genericidx:].upper()
+
+    if len(pips) == 0:
+        await send_error(interaction, f"Fully gernic mana cost has no requirements")
+        return
+
+    uniquepips = {
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 0,
+        "C": 0
+    }
+    for p in pips:
+        if p not in "wubrgc":
+            await send_error(interaction, f"Cannot parse mana cost {cost}")
+            return
+        uniquepips[p] += 1
+
+    reqs = dict()
+    for p in uniquepips:
+        if uniquepips[p] > 0:
+            pcost = str(generic + len(pips) - uniquepips[p]) + "C"*uniquepips[p]
+            if pcost not in KARSTEN:
+                await send_error(interaction, f"No Karsten number for {pcost} (for {p} mana)")
+                return
+            reqs[p] = KARSTEN[pcost]
+
+    if len(reqs) == 1:
+        for p in reqs:
+            await interaction.response.send_message(f"Karsten requires {reqs[p]} {p} sources for a cost of {cost}", ephemeral=True)
+            return
+    else:
+        msg = "Karsten requires "
+        for p in reqs:
+            msg += f"{reqs[p]+1} {p} sources, "
+
+        await interaction.response.send_message(msg[:-2]+f" for a cost of {cost}", ephemeral=True)
+
+
+
