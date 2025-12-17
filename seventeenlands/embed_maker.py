@@ -64,9 +64,7 @@ def gen_card_embed(card: dict, set_code: str, data: dict, formats: list[str], fi
     stored_name = get_card_name(card)
 
     title = name + " " + Manamoji.emojify_mana_cost(mana_cost)
-    print(data)
-    print(card)
-    embed = new_data_embed(title, url=f"https://www.17lands.com/card_data/details?card_id={data['mtga_id']}&expansion={set_code}")
+    embed = new_data_embed(title, url=f"https://www.17lands.com/card_data/details?card_id={data[formats[0]][stored_name]['mtga_id']}&expansion={set_code}")
 
     # Generate a field to show the scope of the data.
     date_range = f"Date Range:\t\t {start_date} to {end_date}" + '\r\n'
