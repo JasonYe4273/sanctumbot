@@ -141,6 +141,7 @@ async def mana(interaction: discord.Interaction, cost: str):
             msg += f"__**{reqs[p]+1} {p}**__ sources, "
 
         pcost = str(generic) + "C"*len(pips)
+        print(pcost)
         if pcost in KARSTEN:
             count = f"all {len(reqs)}"
             if len(reqs) == 2:
