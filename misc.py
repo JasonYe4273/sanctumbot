@@ -126,6 +126,8 @@ async def mana(interaction: discord.Interaction, cost: str):
     for p in uniquepips:
         if uniquepips[p] > 0:
             pcost = str(generic + len(pips) - uniquepips[p]) + "C"*uniquepips[p]
+            if pcost[0] == "0":
+                pcost = pcost[1:]
             if pcost not in KARSTEN:
                 await send_error(interaction, f"No Karsten number for {pcost} (for {p} mana)")
                 return
@@ -141,7 +143,8 @@ async def mana(interaction: discord.Interaction, cost: str):
             msg += f"__**{reqs[p]+1} {p}**__ sources, "
 
         pcost = str(generic) + "C"*len(pips)
-        print(pcost)
+        if pcost[0] == "0":
+            pcost = pcost[1:]
         if pcost in KARSTEN:
             count = f"all {len(reqs)}"
             if len(reqs) == 2:
