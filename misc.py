@@ -98,7 +98,10 @@ async def mana(interaction: discord.Interaction, cost: str):
             genericidx = i
             break
 
-    generic = int(cost[:genericidx])
+    if genericidx == 0:
+        generic = 0
+    else:
+        generic = int(cost[:genericidx])
     pips = cost[genericidx:].upper()
 
     if len(pips) == 0:
