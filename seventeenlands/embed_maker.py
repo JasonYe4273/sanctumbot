@@ -144,7 +144,7 @@ All additional options specified must be separated by spaces. Options include:
 - **Format**: specify format(s) (bo1, bo3, etc) with a comma separated list preceded by `-f=`. Default is Bo1.
 - **Deck color filter**: filter by color(s) of deck by supplying a color combination preceded by `-c=`. Default is no filter.
 - **Time Periods**: the period of time to query about can be set with `-e=` to set the end date for your time range, and `-d=` to specify the number of days you want to query over. Default is to query all time up to the present.
-""",
+"""
     )
 
 

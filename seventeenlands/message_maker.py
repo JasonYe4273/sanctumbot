@@ -43,9 +43,9 @@ async def handle_command(message: str, channel):
     if command == 'colors':
         await send_embed_message(channel, supported_color_strings())
     elif command == 'help':
-        await send_message(channel, how_to_query_17lands())
+        await send_embed_message(channel, how_to_query_17lands())
     elif command == 'code':
-        await send_message(channel, '<https://github.com/JasonYe4273/17lands-helper>')
+        await send_message(channel, 'Based on <https://github.com/JasonYe4273/17lands-helper>')
     else:
         await send_message(channel, 'Current available commands are `colors`, `help`, and `code`')
 
