@@ -130,12 +130,12 @@ async def mana(interaction: discord.Interaction, cost: str):
 
     if len(reqs) == 1:
         for p in reqs:
-            await interaction.response.send_message(f"Karsten requires {reqs[p]} {p} sources for a cost of {cost}", ephemeral=True)
+            await interaction.response.send_message(f"Karsten requires __**{reqs[p]} {p}**__ sources for a cost of {cost}", ephemeral=True)
             return
     else:
         msg = "Karsten requires "
         for p in reqs:
-            msg += f"{reqs[p]+1} {p} sources, "
+            msg += f"__**{reqs[p]+1} {p}**__ sources, "
 
         await interaction.response.send_message(msg[:-2]+f" for a cost of {cost}", ephemeral=True)
 
