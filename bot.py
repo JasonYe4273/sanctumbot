@@ -40,6 +40,8 @@ async def on_message(message: Message) -> None:
     if message.author == client.user:
         return
 
+    print(message.content)
+
     # Handle data queries of the form '{{query | options}}'
     if (DATA_QUERY_L in message.content) and (DATA_QUERY_R in message.content):
         await handle_card_request_v2(message.content, message.channel)
