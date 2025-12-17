@@ -95,7 +95,7 @@ async def mana(interaction: discord.Interaction, cost: str):
     genericidx = 0
     for i in range(len(cost)):
         if not cost[:(i+1)].isnumeric():
-            genericidx = i+1
+            genericidx = i
             break
 
     generic = int(cost[:genericidx])
