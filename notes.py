@@ -19,7 +19,7 @@ async def notes(interaction: discord.Interaction, opponent: str, deck1: str, dec
     deck2 = deck2.lower()
 
     user = interaction.user
-    if hasattr(user, 'nick'):
+    if hasattr(user, 'nick') and user.nick:
         player = user.nick
     else:
         player = user.name
