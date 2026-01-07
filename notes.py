@@ -15,7 +15,7 @@ from database import _get_all_db, _get_one_db, _set_db
 )
 @app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
-async def edit_notes(interaction: discord.Interaction, link: str, player: str, opponent: str, deck1: str, deck2: str, winloss: str):
+async def edit_notes(interaction: discord.Interaction, link: str, player: str="", opponent: str="", deck1: str="", deck2: str="", winloss: str=""):
     if not interaction.guild_id:
         await send_error(interaction, "Can't find server")
         return
@@ -29,23 +29,23 @@ async def edit_notes(interaction: discord.Interaction, link: str, player: str, o
     deck2 = deck2.lower()
 
     if player:
-        _set_db(f"UPDATE messages SET player='{player}' WHERE message='{link}'")
+        _set_db(f"UPDATE notes SET player='{player}' WHERE message='{link}'")
     else:
         player = note[1]
     if opponent:
-        _set_db(f"UPDATE messages SET opponent='{opponent}' WHERE message='{link}'")
+        _set_db(f"UPDATE notes SET opponent='{opponent}' WHERE message='{link}'")
     else:
         opponent = note[2]
     if deck1:
-        _set_db(f"UPDATE messages SET deck1='{deck1}' WHERE message='{link}'")
+        _set_db(f"UPDATE notes SET deck1='{deck1}' WHERE message='{link}'")
     else:
         deck1 = note[3]
     if deck2:
-        _set_db(f"UPDATE messages SET deck2='{deck2}' WHERE message='{link}'")
+        _set_db(f"UPDATE notes SET deck2='{deck2}' WHERE message='{link}'")
     else:
         deck2 = note[4]
     if winloss:
-        _set_db(f"UPDATE messages SET winloss='{winloss}' WHERE message='{link}'")
+        _set_db(f"UPDATE notes SET winloss='{winloss}' WHERE message='{link}'")
     else:
         winloss = note[5]
 
