@@ -121,7 +121,7 @@ async def update_deck_names(server: int):
 
         msg = "# List of Deck Names:\n"
         for d in sorted([k for k in decks], key=lambda x: -decks[x]):
-            msg += f"- {d}\n ({decks[d]} notes)"
+            msg += f"- {d} ({decks[d]} notes)\n"
 
         await message.edit(content=msg)
 
