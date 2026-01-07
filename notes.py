@@ -8,88 +8,6 @@ from database import _get_all_db, _get_one_db, _set_db
 
 
 
-@tree.command(  # type: ignore[arg-type]
-    name="edit_notes",
-    description="Edit Testing Notes",
-    guilds=ALL
-)
-@app_commands.check(log_command)
-@app_commands.checks.has_permissions(administrator=True)
-async def edit_notes(interaction: discord.Interaction, link: str, player: str="", opponent: str="", deck1: str="", deck2: str="", winloss: str=""):
-    if not interaction.guild_id:
-        await send_error(interaction, "Can't find server")
-        return
-
-    note = _get_one_db(f"SELECT message,player,opponent,deck1,deck2,winloss,recorded_at FROM notes WHERE message='{link}' AND server={interaction.guild_id}")
-    if not note:
-        await send_error(interaction, "Could not find note")
-        return
-
-    deck1 = deck1.lower()
-    deck2 = deck2.lower()
-
-    if player:
-        _set_db(f"UPDATE notes SET player='{player}' WHERE message='{link}'")
-    else:
-        player = note[1]
-    if opponent:
-        _set_db(f"UPDATE notes SET opponent='{opponent}' WHERE message='{link}'")
-    else:
-        opponent = note[2]
-    if deck1:
-        _set_db(f"UPDATE notes SET deck1='{deck1}' WHERE message='{link}'")
-    else:
-        deck1 = note[3]
-    if deck2:
-        _set_db(f"UPDATE notes SET deck2='{deck2}' WHERE message='{link}'")
-    else:
-        deck2 = note[4]
-    if winloss:
-        _set_db(f"UPDATE notes SET winloss='{winloss}' WHERE message='{link}'")
-    else:
-        winloss = note[5]
-
-    msg = f"""# Notes for {player} on {deck1} vs {opponent} on {deck2}:
-**RECORD**: {winloss}
-"""
-
-    ids = link.split('/')
-    cid = int(ids[-2])
-    mid = int(ids[-1])
-    channel: discord.TextChannel = client.get_channel(cid)  # type: ignore[assignment]
-    message: discord.Message = await channel.fetch_message(mid)
-
-    await message.edit(content=msg)
-
-    await update_deck_names(interaction.guild_id)
-
-    await interaction.response.send_message("Edited!", ephemeral=True)
-
-
-
-@tree.command(  # type: ignore[arg-type]
-    name="delete_notes",
-    description="Delete Testing Notes",
-    guilds=ALL
-)
-@app_commands.check(log_command)
-@app_commands.checks.has_permissions(administrator=True)
-async def delete_notes(interaction: discord.Interaction, link: str):
-    if not interaction.guild_id:
-        await send_error(interaction, "Can't find server")
-        return
-
-    note = _get_one_db(f"SELECT message,player,opponent,deck1,deck2,winloss,recorded_at FROM notes WHERE message='{link}' AND server={interaction.guild_id}")
-    if not note:
-        await send_error(interaction, "Could not find note")
-        return
-
-    _set_db(f"DELETE FROM notes WHERE message='{link}' AND server={interaction.guild_id}")
-
-    await interaction.response.send_message("Deleted!", ephemeral=True)
-
-
-
 
 @tree.command(  # type: ignore[arg-type]
     name="notes",
@@ -202,6 +120,115 @@ async def update_deck_names(server: int):
             msg += f"- {d}\n"
 
         await message.edit(content=msg)
+
+
+
+@tree.command(  # type: ignore[arg-type]
+    name="edit_notes",
+    description="Edit Testing Notes",
+    guilds=ALL
+)
+@app_commands.check(log_command)
+@app_commands.checks.has_permissions(administrator=True)
+async def edit_notes(interaction: discord.Interaction, link: str, player: str="", opponent: str="", deck1: str="", deck2: str="", winloss: str=""):
+    if not interaction.guild_id:
+        await send_error(interaction, "Can't find server")
+        return
+
+    note = _get_one_db(f"SELECT message,player,opponent,deck1,deck2,winloss,recorded_at FROM notes WHERE message='{link}' AND server={interaction.guild_id}")
+    if not note:
+        await send_error(interaction, "Could not find note")
+        return
+
+    deck1 = deck1.lower()
+    deck2 = deck2.lower()
+
+    if player:
+        _set_db(f"UPDATE notes SET player='{player}' WHERE message='{link}'")
+    else:
+        player = note[1]
+    if opponent:
+        _set_db(f"UPDATE notes SET opponent='{opponent}' WHERE message='{link}'")
+    else:
+        opponent = note[2]
+    if deck1:
+        _set_db(f"UPDATE notes SET deck1='{deck1}' WHERE message='{link}'")
+    else:
+        deck1 = note[3]
+    if deck2:
+        _set_db(f"UPDATE notes SET deck2='{deck2}' WHERE message='{link}'")
+    else:
+        deck2 = note[4]
+    if winloss:
+        _set_db(f"UPDATE notes SET winloss='{winloss}' WHERE message='{link}'")
+    else:
+        winloss = note[5]
+
+    msg = f"""# Notes for {player} on {deck1} vs {opponent} on {deck2}:
+**RECORD**: {winloss}
+"""
+
+    ids = link.split('/')
+    cid = int(ids[-2])
+    mid = int(ids[-1])
+    channel: discord.TextChannel = client.get_channel(cid)  # type: ignore[assignment]
+    message: discord.Message = await channel.fetch_message(mid)
+
+    await message.edit(content=msg)
+
+    await update_deck_names(interaction.guild_id)
+
+    await interaction.response.send_message("Edited!", ephemeral=True)
+
+
+
+@tree.command(  # type: ignore[arg-type]
+    name="delete_notes",
+    description="Delete Testing Notes",
+    guilds=ALL
+)
+@app_commands.check(log_command)
+@app_commands.checks.has_permissions(administrator=True)
+async def delete_notes(interaction: discord.Interaction, link: str):
+    if not interaction.guild_id:
+        await send_error(interaction, "Can't find server")
+        return
+
+    note = _get_one_db(f"SELECT message,player,opponent,deck1,deck2,winloss,recorded_at FROM notes WHERE message='{link}' AND server={interaction.guild_id}")
+    if not note:
+        await send_error(interaction, "Could not find note")
+        return
+
+    _set_db(f"DELETE FROM notes WHERE message='{link}' AND server={interaction.guild_id}")
+
+    await update_deck_names(interaction.guild_id)
+
+    await interaction.response.send_message("Deleted!", ephemeral=True)
+
+
+
+@tree.command(  # type: ignore[arg-type]
+    name="rename_decks",
+    description="Rename deck in notes",
+    guilds=ALL
+)
+@app_commands.check(log_command)
+@app_commands.checks.has_permissions(administrator=True)
+async def rename_decks(interaction: discord.Interaction, old: str, new: str):
+    if not interaction.guild_id:
+        await send_error(interaction, "Can't find server")
+        return
+
+    _set_db(f"UPDATE notes SET deck1='{new}' WHERE deck1='{old}' AND server={interaction.guild_id}")
+    _set_db(f"UPDATE notes SET deck2='{new}' WHERE deck2='{old}' AND server={interaction.guild_id}")
+
+    await update_deck_names(interaction.guild_id)
+
+    await interaction.response.send_message("Renamed!", ephemeral=True)
+
+
+
+
 
 
 
