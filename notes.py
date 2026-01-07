@@ -14,6 +14,63 @@ from database import _get_all_db, _get_one_db, _set_db
     guilds=ALL
 )
 @app_commands.check(log_command)
+@app_commands.checks.has_permissions(administrator=True)
+async def edit_notes(interaction: discord.Interaction, link: str, player: str, opponent: str, deck1: str, deck2: str, winloss: str):
+    if not interaction.guild_id:
+        await send_error(interaction, "Can't find server")
+        return
+
+    note = _get_one_db(f"SELECT message,player,opponent,deck1,deck2,winloss,recorded_at FROM notes WHERE message='{link}' AND server={interaction.guild_id}")
+    if not note:
+        await send_error(interaction, "Could not find note")
+        return
+
+    deck1 = deck1.lower()
+    deck2 = deck2.lower()
+
+    if player:
+        _set_db(f"UPDATE messages SET player='{player}' WHERE message='{link}'")
+    else:
+        player = note[1]
+    if opponent:
+        _set_db(f"UPDATE messages SET opponent='{opponent}' WHERE message='{link}'")
+    else:
+        opponent = note[2]
+    if deck1:
+        _set_db(f"UPDATE messages SET deck1='{deck1}' WHERE message='{link}'")
+    else:
+        deck1 = note[3]
+    if deck2:
+        _set_db(f"UPDATE messages SET deck2='{deck2}' WHERE message='{link}'")
+    else:
+        deck2 = note[4]
+    if winloss:
+        _set_db(f"UPDATE messages SET winloss='{winloss}' WHERE message='{link}'")
+    else:
+        winloss = note[5]
+
+    msg = f"""# Notes for {player} on {deck1} vs {opponent} on {deck2}:
+**RECORD**: {winloss}
+"""
+
+    ids = link.split('/')
+    cid = int(ids[-2])
+    mid = int(ids[-1])
+    channel: discord.TextChannel = client.get_channel(cid)  # type: ignore[assignment]
+    message: discord.Message = await channel.fetch_message(mid)
+
+    await message.edit(content=msg)
+
+    await update_deck_names(interaction.guild_id)
+
+
+
+@tree.command(  # type: ignore[arg-type]
+    name="notes",
+    description="Record Testing Notes",
+    guilds=ALL
+)
+@app_commands.check(log_command)
 async def notes(interaction: discord.Interaction, opponent: str, deck1: str, deck2: str, winloss: str):
     deck1 = deck1.lower()
     deck2 = deck2.lower()
