@@ -3,7 +3,7 @@ from datetime import datetime
 import discord
 from discord import app_commands
 
-from util import client, tree, send_error, log_command, ALL
+from util import client, tree, send_error, send_long_msg, log_command, ALL
 from database import _get_all_db, _get_one_db, _set_db
 
 
@@ -57,7 +57,7 @@ async def search_notes(interaction: discord.Interaction, deck: str):
     msg = f"{len(notes)} sets of testing notes found for {deck}:\n"
     for note in notes:
         msg += f"- {note[1]} on {note[3]} vs {note[2]} on {note[4]} ({note[5]}) @ <t:{note[6]}:s>: {note[0]}\n"
-    await interaction.response.send_message(msg)
+    await send_long_msg(interaction, msg)
 
 
 @tree.command(  # type: ignore[arg-type]

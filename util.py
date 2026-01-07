@@ -32,6 +32,38 @@ async def send_error(interaction: discord.Interaction, message: str):
             ephemeral=True
         )
 
+async def send_long_msg(interaction: discord.Interaction, message: str):
+    if interaction and not interaction.response.is_done() and interaction.channel_id:
+        channel = client.get_channel(interaction.channel_id)
+        if not isinstance(channel, discord.TextChannel):
+            await send_error(interaction, "Not a text channel")
+            return
+
+        lines = message.split('\n')
+        i = 0
+
+        for l in lines:
+            if len(l) >= 2000:
+                await send_error(interaction, "Single line of response too long, contact Jason")
+                return
+
+        chunks = []
+        while i < len(lines):
+            chunk = ""
+            while i < len(lines) and len(chunk) + len(lines[i]) < 2000:
+                chunk += lines[i] + '\n'
+                i += 1
+            chunks.append(chunk)
+
+        for i in range(len(chunks)):
+            if i == 0:
+                await interaction.response.send_message(chunk[0])
+            else:
+                await channel.send(chunk[i])
+
 def log_command(interaction: discord.Interaction) -> bool:
     print(f"{str(interaction.user)} used /{interaction.command.name}")  # type: ignore[union-attr]
     return True
+
+
+
