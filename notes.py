@@ -54,11 +54,10 @@ async def search_notes(interaction: discord.Interaction, deck: str):
         await interaction.response.send_message(f"No testing notes found for {deck}")
         return
 
+    msg = f"{len(notes)} sets of testing notes found for {deck}:\n"
     for note in notes:
-        msg = f"{len(notes)} sets of testing notes found for {deck}:\n"
-        for note in notes:
-            msg += f"- {note[1]} on {note[3]} vs {note[2]} on {note[4]} ({note[5]}) @ <t:{note[6]}:s>: {note[0]}\n"
-        await interaction.response.send_message(msg)
+        msg += f"- {note[1]} on {note[3]} vs {note[2]} on {note[4]} ({note[5]}) @ <t:{note[6]}:s>: {note[0]}\n"
+    await interaction.response.send_message(msg)
 
 
 @tree.command(  # type: ignore[arg-type]
