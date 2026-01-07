@@ -219,7 +219,35 @@ async def rename_decks(interaction: discord.Interaction, old: str, new: str):
         await send_error(interaction, "Can't find server")
         return
 
+    notes = _get_all_db(f"SELECT message,player,opponent,deck1,deck2,winloss FROM notes WHERE deck1='{old}' AND server={interaction.guild_id}")
+    for n in notes:
+        msg = f"""# Notes for {n[1]} on {new} vs {n[2]} on {n[4]}:
+    **RECORD**: {n[5]}
+    """
+
+        ids = n[0].split('/')
+        cid = int(ids[-2])
+        mid = int(ids[-1])
+        channel: discord.TextChannel = client.get_channel(cid)  # type: ignore[assignment]
+        message: discord.Message = await channel.fetch_message(mid)
+
+        await message.edit(content=msg)
     _set_db(f"UPDATE notes SET deck1='{new}' WHERE deck1='{old}' AND server={interaction.guild_id}")
+
+
+    notes = _get_all_db(f"SELECT message,player,opponent,deck1,deck2,winloss,recorded_at FROM notes WHERE deck2='{old}' AND server={interaction.guild_id}")
+    for n in notes:
+        msg = f"""# Notes for {n[1]} on {n[3]} vs {n[2]} on {new}:
+    **RECORD**: {n[5]}
+    """
+
+        ids = n[0].split('/')
+        cid = int(ids[-2])
+        mid = int(ids[-1])
+        channel = client.get_channel(cid)  # type: ignore[assignment]
+        message = await channel.fetch_message(mid)
+
+        await message.edit(content=msg)
     _set_db(f"UPDATE notes SET deck2='{new}' WHERE deck2='{old}' AND server={interaction.guild_id}")
 
     await update_deck_names(interaction.guild_id)
