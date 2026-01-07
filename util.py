@@ -47,6 +47,8 @@ async def send_long_msg(interaction: discord.Interaction, message: str):
                 await send_error(interaction, "Single line of response too long, contact Jason")
                 return
 
+        print(lines)
+
         chunks = []
         while i < len(lines):
             chunk = ""
@@ -54,6 +56,8 @@ async def send_long_msg(interaction: discord.Interaction, message: str):
                 chunk += lines[i] + '\n'
                 i += 1
             chunks.append(chunk)
+
+        print(chunks)
 
         for i in range(len(chunks)):
             if i == 0:
