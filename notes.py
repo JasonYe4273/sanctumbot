@@ -107,17 +107,21 @@ async def update_deck_names(server: int):
         deck1s = _get_all_db(f"SELECT deck1 FROM notes WHERE server={server}")
         deck2s = _get_all_db(f"SELECT deck2 FROM notes WHERE server={server}")
 
-        decks = []
+        decks = {}
         for d in deck1s:
             if d[0] not in decks:
-                decks.append(d[0])
+                decks[d[0]] = 1
+            else:
+                decks[d[0]] += 1
         for d in deck2s:
             if d[0] not in decks:
-                decks.append(d[0])
+                decks[d[0]] = 1
+            else:
+                decks[d[0]] += 1
 
         msg = "# List of Deck Names:\n"
-        for d in decks:
-            msg += f"- {d}\n"
+        for d in sorted([k for k in decks], key=lambda x: -decks[x]):
+            msg += f"- {d}\n ({decks[d]} notes)"
 
         await message.edit(content=msg)
 
