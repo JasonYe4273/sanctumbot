@@ -9,8 +9,8 @@ from database import _get_all_db, _get_one_db, _set_db
 
 
 @tree.command(  # type: ignore[arg-type]
-    name="notes",
-    description="Record Testing Notes",
+    name="edit_notes",
+    description="Edit Testing Notes",
     guilds=ALL
 )
 @app_commands.check(log_command)
@@ -62,6 +62,32 @@ async def edit_notes(interaction: discord.Interaction, link: str, player: str, o
     await message.edit(content=msg)
 
     await update_deck_names(interaction.guild_id)
+
+    await interaction.response.send_message("Edited!", ephemeral=True)
+
+
+
+@tree.command(  # type: ignore[arg-type]
+    name="delete_notes",
+    description="Delete Testing Notes",
+    guilds=ALL
+)
+@app_commands.check(log_command)
+@app_commands.checks.has_permissions(administrator=True)
+async def delete_notes(interaction: discord.Interaction, link: str):
+    if not interaction.guild_id:
+        await send_error(interaction, "Can't find server")
+        return
+
+    note = _get_one_db(f"SELECT message,player,opponent,deck1,deck2,winloss,recorded_at FROM notes WHERE message='{link}' AND server={interaction.guild_id}")
+    if not note:
+        await send_error(interaction, "Could not find note")
+        return
+
+    _set_db(f"DELETE FROM notes WHERE message='{link}' AND server={interaction.guild_id}")
+
+    await interaction.response.send_message("Deleted!", ephemeral=True)
+
 
 
 
