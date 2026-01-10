@@ -13,10 +13,10 @@
         "uncommon": 3,
         "wildcard": 1,
         "rare_mythic": 1,
-        "foil": 1,
+        "foil": 1
       },
       "weight": 1
-    },
+    }
   ],
   "sheets": {
     "common": {
@@ -847,7 +847,7 @@
         "ecl:foil:252": 1,
         "ecl:foil:253": 1
       }
-    },
+    }
   },
   "source_set_codes": [
     "ecl"
