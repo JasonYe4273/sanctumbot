@@ -14,8 +14,8 @@ SEALED_DATA = dict()
 def fetch_sealed_data():
   try:
     # TEMP ECL DATA
-    with open("ecl.json") as f:
-      SEALED_DATA["ECL"] = json.load(f)
+    # with open("ecl.json") as f:
+    #   SEALED_DATA["ECL"] = json.load(f)
 
     resp = requests.get("https://raw.githubusercontent.com/taw/magic-sealed-data/refs/heads/master/sealed_basic_data.json")
     for s in resp.json():
