@@ -43,15 +43,16 @@ async def init_limited(interaction: discord.Interaction, setcode: str):
   for i in range(len(channel_cards)):
     cards = requests.get(f'https://api.scryfall.com/cards/search?q=e%3A{code}+{channel_cards[i][1]}').json()["data"]
     category = await guild.create_category(f"{code} {channel_cards[i][0]}")
-    i = 0
+    j = 0
     n = 1
     for c in cards:
-      if i >= 50:
+      if j >= 50:
+        j = 0
         n += 1
         category = await guild.create_category(f"{code} {channel_cards[i][0]} {n}")
       ni = get_name_and_image(c)
       channel = await category.create_text_channel(ni[0])
-      i += 1
+      j += 1
       if ni[1]:
         await channel.send(content=ni[1])
 
