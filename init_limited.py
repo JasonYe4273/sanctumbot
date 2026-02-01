@@ -23,6 +23,8 @@ async def init_limited(interaction: discord.Interaction, setcode: str):
   if not guild:
     await send_error(interaction, "Could not find server")
     return
+
+  await interaction.response.send_message("Working...", ephemeral=True)
   
   channel_cards = [
     ["Rares and Mythics", "r>u"],
@@ -36,8 +38,8 @@ async def init_limited(interaction: discord.Interaction, setcode: str):
     ["Red Uncommons", "r%3Du+c%3Dr"],
     ["Green Commons", "r%3Dc+c%3Dg"],
     ["Green Uncommons", "r%3Du+c%3Dg"],
-    ["Other Commons", "r%3Dc+-%28c%3Dw+or+c%3Du+or+c%3Db+or+c%3Dr+or+c%3Dg%29+-is%3Abasic"],
-    ["Other Uncommons", "r%3Du+-%28c%3Dw+or+c%3Du+or+c%3Db+or+c%3Dr+or+c%3Dg%29+-is%3Abasic"]
+    ["Other Commons", "r%3Dc+-%28c%3Dw+or+c%3Du+or+c%3Db+or+c%3Dr+or+c%3Dg%29+-t%3Abasic"],
+    ["Other Uncommons", "r%3Du+-%28c%3Dw+or+c%3Du+or+c%3Db+or+c%3Dr+or+c%3Dg%29"]
   ]
 
   for i in range(len(channel_cards)):
