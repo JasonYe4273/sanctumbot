@@ -3,7 +3,7 @@ from discord import app_commands, Message
 from discord.ext import tasks
 
 from database import con, cur, _get_one_db, _get_all_db, _set_db
-from util import client, tree, send_error, TOKEN, TEST, DRAFT, SANCTUM, PT
+from util import client, tree, send_error, TOKEN, ALL
 
 import misc
 import tournaments
@@ -85,10 +85,8 @@ async def refresh_data() -> None:
 
 @client.event
 async def on_ready():
-    await tree.sync(guild=TEST)
-    await tree.sync(guild=DRAFT)
-    await tree.sync(guild=SANCTUM)
-    await tree.sync(guild=PT)
+    for g in ALL:
+        await tree.sync(guild=g)
 
     Manamoji.cache_manamojis(client)
     DataCache.fetch_data(OLD_SETS)
