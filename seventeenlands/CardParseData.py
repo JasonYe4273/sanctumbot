@@ -308,6 +308,7 @@ class MessageParseData:
 
         self._card_name_list: list[str] = []
         self.CARDS: list[dict] = []
+        self.CARD_SEARCH_ERRORS: list[str] = []
         self.CARD_CALLS: list[CardParseData] = []
 
         self._parse_cards()
@@ -326,6 +327,8 @@ class MessageParseData:
             card = query_scryfall(name)
             if 'error' not in card:
                 self.CARDS.append(card)
+            else:
+                self.CARD_SEARCH_ERRORS.append(card['error'])
 
     def _gen_card_calls(self):
         # For each found card,

@@ -17,7 +17,7 @@ def format_data(data: Union[float, int, str]) -> str:
     """
     if not isinstance(data, float):
         return str(data)
-    elif 0 < data < 1:
+    elif -1 < data < 1:
         return "{:.1f}%".format(data * 100)
     else:
         return "{:.2f}".format(data)

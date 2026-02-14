@@ -132,9 +132,10 @@ async def handle_card_request_v2(message: str, channel) -> None:
     for call in match:
         card_parse = MessageParseData(call)
 
-        if len(card_parse.CARD_CALLS) == 0:
-            await send_message(channel, f"Could not parse any card names from '{card_parse.CMD_STR}'")
-        else:
+        for e in card_parse.CARD_SEARCH_ERRORS:
+            await send_message(channel, e)
+
+        if len(card_parse.CARD_CALLS) > 0:
             if not card_parse.OPTIONS.PARSED:
                 msg_str = f"WARNING! Could not parse options `{card_parse.OPTIONS.OPTIONS_STR}`.\n" \
                           f"Some options have been reset to their defaults."
