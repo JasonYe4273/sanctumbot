@@ -15,15 +15,10 @@ from database import _get_all_db, _get_one_db, _set_db
     guilds=ALL
 )
 @app_commands.check(log_command)
-async def notes(interaction: discord.Interaction, opponent: str, deck1: str, deck2: str, winloss: str):
+async def notes(interaction: discord.Interaction, player: str, opponent: str, deck1: str, deck2: str, winloss: str):
     deck1 = deck1.lower()
     deck2 = deck2.lower()
 
-    user = interaction.user
-    if hasattr(user, 'nick') and user.nick:
-        player = user.nick
-    else:
-        player = user.name
     msg = f"""# Notes for {player} on {deck1} vs {opponent} on {deck2}:
 **RECORD**: {winloss} 
 """
@@ -140,7 +135,6 @@ async def edit_notes(interaction: discord.Interaction, link: str, player: str=""
 
     link = 'https://discord.com/channels/' + link.split('/channels/')[-1]
 
-    print(f"SELECT message,player,opponent,deck1,deck2,winloss,recorded_at FROM notes WHERE message='{link}' AND server={interaction.guild_id}")
     note = _get_one_db(f"SELECT message,player,opponent,deck1,deck2,winloss,recorded_at FROM notes WHERE message='{link}' AND server={interaction.guild_id}")
     if not note:
         await send_error(interaction, "Could not find note")
