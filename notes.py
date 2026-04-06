@@ -138,6 +138,7 @@ async def edit_notes(interaction: discord.Interaction, link: str, player: str=""
         await send_error(interaction, "Can't find server")
         return
 
+    print(f"SELECT message,player,opponent,deck1,deck2,winloss,recorded_at FROM notes WHERE message='{link}' AND server={interaction.guild_id}")
     note = _get_one_db(f"SELECT message,player,opponent,deck1,deck2,winloss,recorded_at FROM notes WHERE message='{link}' AND server={interaction.guild_id}")
     if not note:
         await send_error(interaction, "Could not find note")
