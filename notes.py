@@ -28,8 +28,7 @@ def get_deck_names(server: int):
     return decks
 
 for s in ALL:
-    print(s)
-    DECKNAME_CACHE[s] = get_deck_names(s)
+    DECKNAME_CACHE[s.id] = get_deck_names(s.id)
 print(DECKNAME_CACHE)
 
 
