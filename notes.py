@@ -33,10 +33,11 @@ for s in ALL:
 
 
 async def deck_name_autocomplete(interaction: discord.Interaction, current: str) -> list[app_commands.Choice[str]]:
+    subseq = re.compile('.*'.join(re.escape(x) for x in current.lower()))
     return [
         app_commands.Choice(name=n, value=n)
         for n in DECKNAME_CACHE[interaction.guild_id]
-        if current.lower() in n.lower()
+        if subseq.search(n.lower())
     ][:10]
 
 
