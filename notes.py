@@ -27,7 +27,7 @@ def get_deck_names(server: int):
 
     return decks
 
-for s in _get_all_db(f"SELECT server FROM notes"):
+for s in ALL:
     DECKNAME_CACHE[s] = get_deck_names(s)
 print(DECKNAME_CACHE)
 
