@@ -7,6 +7,37 @@ from util import client, tree, send_error, send_long_msg, log_command, ALL
 from database import _get_all_db, _get_one_db, _set_db
 
 
+DECKNAME_CACHE = dict()
+
+def get_deck_names(server: int):
+    deck1s = _get_all_db(f"SELECT deck1 FROM notes WHERE server={server}")
+    deck2s = _get_all_db(f"SELECT deck2 FROM notes WHERE server={server}")
+
+    decks = dict()
+    for d in deck1s:
+        if d[0] not in decks:
+            decks[d[0]] = 1
+        else:
+            decks[d[0]] += 1
+    for d in deck2s:
+        if d[0] not in decks:
+            decks[d[0]] = 1
+        else:
+            decks[d[0]] += 1
+
+    return decks
+
+for s in _get_all_db(f"SELECT server FROM notes"):
+    DECKNAME_CACHE[s] = get_deck_names(s)
+print(DECKNAME_CACHE)
+
+
+async def deck_name_autocomplete(interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
+    return [
+        app_commands.Choice(name=n, value=n)
+        for n in DECKNAME_CACHE[interaction.guild_id]
+        if current.lower() in n.lower()
+    ]
 
 
 @tree.command(  # type: ignore[arg-type]
@@ -15,6 +46,8 @@ from database import _get_all_db, _get_one_db, _set_db
     guilds=ALL
 )
 @app_commands.check(log_command)
+@app_commands.autocomplete(deck1=deck_name_autocomplete)
+@app_commands.autocomplete(deck2=deck_name_autocomplete)
 async def notes(interaction: discord.Interaction, player: str, opponent: str, deck1: str, deck2: str, winloss: str):
     deck1 = deck1.lower()
     deck2 = deck2.lower()
@@ -98,20 +131,7 @@ async def update_deck_names(server: int):
     message: discord.Message = await channel.fetch_message(mid)
 
     if message:
-        deck1s = _get_all_db(f"SELECT deck1 FROM notes WHERE server={server}")
-        deck2s = _get_all_db(f"SELECT deck2 FROM notes WHERE server={server}")
-
-        decks = {}
-        for d in deck1s:
-            if d[0] not in decks:
-                decks[d[0]] = 1
-            else:
-                decks[d[0]] += 1
-        for d in deck2s:
-            if d[0] not in decks:
-                decks[d[0]] = 1
-            else:
-                decks[d[0]] += 1
+        decks = get_deck_names(server)
 
         msg = "# List of Deck Names:\n"
         for d in sorted([k for k in decks], key=lambda x: -decks[x]):
