@@ -37,7 +37,7 @@ async def deck_name_autocomplete(interaction: discord.Interaction, current: str)
         app_commands.Choice(name=n, value=n)
         for n in DECKNAME_CACHE[interaction.guild_id]
         if current.lower() in n.lower()
-    ][10:]
+    ][:10]
 
 
 @tree.command(  # type: ignore[arg-type]
