@@ -32,7 +32,7 @@ for s in ALL:
 print(DECKNAME_CACHE)
 
 
-async def deck_name_autocomplete(interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
+async def deck_name_autocomplete(interaction: discord.Interaction, current: str) -> list[app_commands.Choice[str]]:
     return [
         app_commands.Choice(name=n, value=n)
         for n in DECKNAME_CACHE[interaction.guild_id]
