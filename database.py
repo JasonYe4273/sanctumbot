@@ -108,6 +108,14 @@ cur.execute("""CREATE TABLE IF NOT EXISTS deck_names(
   message BIGINT NOT NULL
 )""")
 con.commit()
+cur.execute("""CREATE TABLE IF NOT EXISTS card_notes(
+  server BIGINT NOT NULL,
+  card TEXT NOT NULL,
+  note TEXT NOT NULL,
+  recorded_by TEXT NOT NULL,
+  recorded_at BIGINT NOT NULL
+)""")
+con.commit()
 
 
 def _get_one_db(query_str: str):
