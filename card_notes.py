@@ -30,7 +30,8 @@ async def card_autocomplete(interaction: discord.Interaction, current: str) -> l
 @app_commands.autocomplete(card=card_autocomplete)
 async def add_card_note(interaction: discord.Interaction, your_name: str, card: str, note: str):
     if card.lower() not in LOWER_CARD_LIST:
-    	await send_error(interaction, "Invalid card")
+        await send_error(interaction, "Invalid card")
+        return
 
     _set_db(
         f"""INSERT INTO card_notes (server, card, note, recorded_by, recorded_at) VALUES
@@ -49,8 +50,9 @@ async def add_card_note(interaction: discord.Interaction, your_name: str, card: 
 @app_commands.check(log_command)
 @app_commands.autocomplete(card=card_autocomplete)
 async def card_notes(interaction: discord.Interaction, card: str):
-	if card.lower() not in LOWER_CARD_LIST:
-    	await send_error(interaction, "Invalid card")
+    if card.lower() not in LOWER_CARD_LIST:
+        await send_error(interaction, "Invalid card")
+        return
 
     notes = _get_all_db(f"SELECT note,recorded_by,recorded_at FROM card_notes WHERE server={interaction.guild_id} AND card='{card.lower()}'")
     if len(notes) == 0:
