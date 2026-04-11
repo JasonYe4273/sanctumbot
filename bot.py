@@ -10,6 +10,7 @@ import tournaments
 import mythicscraper
 import booster
 import notes
+import card_notes
 import init_limited
 
 from seventeenlands.utils.consts import COMMAND_STR, DATA_QUERY_L, DATA_QUERY_R
