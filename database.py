@@ -118,27 +118,27 @@ cur.execute("""CREATE TABLE IF NOT EXISTS card_notes(
 con.commit()
 
 
-def _get_one_db(query_str: str):
+def _get_one_db(query_str: str, params=None):
     try:
-        cur.execute(query_str)
+        cur.execute(query_str, params)
         return cur.fetchone()
     except Exception as e:
         cur.execute("ROLLBACK")
         con.commit()
         raise e
 
-def _get_all_db(query_str: str):
+def _get_all_db(query_str: str, params=None):
     try:
-        cur.execute(query_str)
+        cur.execute(query_str, params)
         return cur.fetchall()
     except Exception as e:
         cur.execute("ROLLBACK")
         con.commit()
         raise e
 
-def _set_db(query_str: str):
+def _set_db(query_str: str, params=None):
     try:
-        cur.execute(query_str)
+        cur.execute(query_str, params)
         con.commit()
     except Exception as e:
         cur.execute("ROLLBACK")

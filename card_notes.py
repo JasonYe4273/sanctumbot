@@ -35,7 +35,8 @@ async def add_card_note(interaction: discord.Interaction, your_name: str, card: 
 
     _set_db(
         f"""INSERT INTO card_notes (server, card, note, recorded_by, recorded_at) VALUES
-        ({interaction.guild_id}, '{card.lower()}', '{note}', '{your_name}', {int(datetime.now().timestamp())})"""
+        (%s, %s, %s, %s, %s)""",
+        (interaction.guild_id, card.lower(), note, your_name, int(datetime.now().timestamp()))
     )
 
     await interaction.response.send_message("Recorded!", ephemeral=True)
