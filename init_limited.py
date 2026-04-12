@@ -38,12 +38,12 @@ async def init_limited(interaction: discord.Interaction, setcode: str, bonus_set
     # ["Red Uncommons", "r%3Du+c%3Dr"],
     # ["Green Commons", "r%3Dc+c%3Dg"],
     # ["Green Uncommons", "r%3Du+c%3Dg"],
-    ["Silverquill U/Cs", "r<r+c%3Dwb"],
-    ["Witherbloom U/Cs", "r<r+c%3Dbg"],
-    ["Quandrix U/Cs", "r<r+c%3Dgu"],
-    ["Prismari U/Cs", "r<r+c%3Dur"],
-    ["Lorehold U/Cs", "r<r+c%3Drw"],
-    ["Colorless U/Cs", "r<r+c%3D0+-t%3Aland"],
+    # ["Silverquill U/Cs", "r<r+c%3Dwb"],
+    # ["Witherbloom U/Cs", "r<r+c%3Dbg"],
+    # ["Quandrix U/Cs", "r<r+c%3Dgu"],
+    # ["Prismari U/Cs", "r<r+c%3Dur"],
+    # ["Lorehold U/Cs", "r<r+c%3Drw"],
+    # ["Colorless U/Cs", "r<r+c%3D0+-t%3Aland"],
   ]
 
   async def category_init(query: str, name: str):
@@ -65,7 +65,7 @@ async def init_limited(interaction: discord.Interaction, setcode: str, bonus_set
   for i in range(len(channel_cards)):
     await category_init(f'e%3A{code}+{channel_cards[i][1]}', f'{code} {channel_cards[i][0]}')
   if bonus_setcode:
-    await category_init(f'e%3A{code}+lang%3Aen', f'{code} Bonus Sheet')
+    await category_init(f'e%3A{bonus_setcode}+lang%3Aen', f'{code} Bonus Sheet')
 
 
 
@@ -88,8 +88,6 @@ async def delete_category(interaction: discord.Interaction, confirm: str):
   for c in category.channels:
     await c.delete()
   await category.delete()
-
-  await interaction.response.send_message("Deleted", ephemeral=True)
 
 
 
