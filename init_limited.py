@@ -77,7 +77,7 @@ async def init_limited(interaction: discord.Interaction, setcode: str, bonus_set
 @app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
 async def delete_category(interaction: discord.Interaction, category: str):
-  category = discord.utils.get(interaction.guild, id=category)
+  category = discord.utils.get(interaction.guild.categories, id=category)
   for c in category.channels:
     await c.delete()
   await category.delete()
