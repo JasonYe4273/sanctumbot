@@ -69,7 +69,7 @@ async def init_limited(interaction: discord.Interaction, setcode: str, bonus_set
 
 
 def get_name_and_image(card_data):
-  if "card_faces" in card_data:
+  if card_data['layout'] in ['transform', 'modal_dfc']:
     return [card_data["card_faces"][0]["name"], card_data["card_faces"][0]["image_uris"]["png"] + "\n" + card_data["card_faces"][1]["image_uris"]["png"]]
   else:
     return [card_data["name"], card_data["image_uris"]["png"]]
