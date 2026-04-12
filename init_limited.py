@@ -68,6 +68,24 @@ async def init_limited(interaction: discord.Interaction, setcode: str, bonus_set
     await category_init(f'e%3A{code}', f'{code} Bonus Sheet')
 
 
+
+@tree.command(  # type: ignore[arg-type]
+    name="delete_category",
+    description="[ADMIN ONLY] Delete a category.",
+    guilds=ALL
+)
+@app_commands.check(log_command)
+@app_commands.checks.has_permissions(administrator=True)
+def delete_category(interaction: discord.Interaction, category: int):
+  category = discord.utils.get(interaction.guild, id=category)
+  for c in category.channels:
+    await c.delete()
+  await category.delete()
+
+  await interaction.response.send_message("Deleted", ephemeral=True)
+
+
+
 def get_name_and_image(card_data):
   if card_data['layout'] in ['transform', 'modal_dfc']:
     return [card_data["card_faces"][0]["name"], card_data["card_faces"][0]["image_uris"]["png"] + "\n" + card_data["card_faces"][1]["image_uris"]["png"]]
