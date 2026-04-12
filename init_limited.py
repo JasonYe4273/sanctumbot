@@ -46,7 +46,7 @@ async def init_limited(interaction: discord.Interaction, setcode: str, bonus_set
     ["Colorless U/Cs", "r<r+c%D0+-t%3Aland"],
   ]
 
-  def category_init(query: str, name: str):
+  async def category_init(query: str, name: str):
     cards = requests.get(f'https://api.scryfall.com/cards/search?q={query}').json()["data"]
     category = await guild.create_category(name)
     j = 0
@@ -63,9 +63,9 @@ async def init_limited(interaction: discord.Interaction, setcode: str, bonus_set
         await channel.send(content=ni[1])
 
   for i in range(len(channel_cards)):
-    category_init(f'e%3A{code}+{channel_cards[i][1]}', f'{code} {channel_cards[i][0]}')
+    await category_init(f'e%3A{code}+{channel_cards[i][1]}', f'{code} {channel_cards[i][0]}')
   if bonus_setcode:
-    category_init(f'e%3A{code}', f'{code} Bonus Sheet')
+    await category_init(f'e%3A{code}', f'{code} Bonus Sheet')
 
 
 def get_name_and_image(card_data):
