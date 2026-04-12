@@ -71,13 +71,20 @@ async def init_limited(interaction: discord.Interaction, setcode: str, bonus_set
 
 @tree.command(  # type: ignore[arg-type]
     name="delete_category",
-    description="[ADMIN ONLY] Delete a category.",
+    description="[ADMIN ONLY] Delete a category. Must confirm by typing DELETE.",
     guilds=ALL
 )
 @app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
-async def delete_category(interaction: discord.Interaction, category: str):
-  category = discord.utils.get(interaction.guild.categories, id=category)
+async def delete_category(interaction: discord.Interaction, confirm: str):
+  if confirm != "DELETE":
+    await send_error(interaction, "Aborted!")
+    return
+
+  category = interaction.channel.category
+  if not category:
+    await send_error(interaction, "Channel not in a category.")
+
   for c in category.channels:
     await c.delete()
   await category.delete()
