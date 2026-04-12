@@ -65,7 +65,7 @@ async def init_limited(interaction: discord.Interaction, setcode: str, bonus_set
   for i in range(len(channel_cards)):
     await category_init(f'e%3A{code}+{channel_cards[i][1]}', f'{code} {channel_cards[i][0]}')
   if bonus_setcode:
-    await category_init(f'e%3A{code}', f'{code} Bonus Sheet')
+    await category_init(f'e%3A{code}+lang%3Aen', f'{code} Bonus Sheet')
 
 
 
@@ -76,7 +76,7 @@ async def init_limited(interaction: discord.Interaction, setcode: str, bonus_set
 )
 @app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
-async def delete_category(interaction: discord.Interaction, category: int):
+async def delete_category(interaction: discord.Interaction, category: long):
   category = discord.utils.get(interaction.guild, id=category)
   for c in category.channels:
     await c.delete()
