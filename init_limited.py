@@ -17,7 +17,7 @@ from util import client, tree, send_error, log_command, ALL
 )
 @app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
-async def init_limited(interaction: discord.Interaction, setcode: str):
+async def init_limited(interaction: discord.Interaction, setcode: str, bonus_setcode: str=""):
   code = setcode.upper()
   guild = interaction.guild
   if not guild:
@@ -38,25 +38,34 @@ async def init_limited(interaction: discord.Interaction, setcode: str):
     ["Red Uncommons", "r%3Du+c%3Dr"],
     ["Green Commons", "r%3Dc+c%3Dg"],
     ["Green Uncommons", "r%3Du+c%3Dg"],
-    ["Other Commons", "r%3Dc+-%28c%3Dw+or+c%3Du+or+c%3Db+or+c%3Dr+or+c%3Dg%29+-t%3Abasic"],
-    ["Other Uncommons", "r%3Du+-%28c%3Dw+or+c%3Du+or+c%3Db+or+c%3Dr+or+c%3Dg%29"]
+    ["Silverquill U/Cs", "r<r+c%Dwb"],
+    ["Witherbloom U/Cs", "r<r+c%Dbg"],
+    ["Quandrix U/Cs", "r<r+c%Dgu"],
+    ["Prismari U/Cs", "r<r+c%Dur"],
+    ["Lorehold U/Cs", "r<r+c%Drw"],
+    ["Colorless U/Cs", "r<r+c%D0+-t%3Aland"],
   ]
 
-  for i in range(len(channel_cards)):
-    cards = requests.get(f'https://api.scryfall.com/cards/search?q=e%3A{code}+{channel_cards[i][1]}').json()["data"]
-    category = await guild.create_category(f"{code} {channel_cards[i][0]}")
+  def category_init(query: str, name: str):
+    cards = requests.get(f'https://api.scryfall.com/cards/search?q={query}').json()["data"]
+    category = await guild.create_category(name)
     j = 0
     n = 1
     for c in cards:
       if j >= 50:
         j = 0
         n += 1
-        category = await guild.create_category(f"{code} {channel_cards[i][0]} {n}")
+        category = await guild.create_category(f"{name} {n}")
       ni = get_name_and_image(c)
       channel = await category.create_text_channel(ni[0])
       j += 1
       if ni[1]:
         await channel.send(content=ni[1])
+
+  for i in range(len(channel_cards)):
+    category_init(f'e%3A{code}+{channel_cards[i][1]}', f'{code} {channel_cards[i][0]}')
+  if bonus_setcode:
+    category_init(f'e%3A{code}', f'{code} Bonus Sheet')
 
 
 def get_name_and_image(card_data):
