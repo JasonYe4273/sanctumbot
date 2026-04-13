@@ -7,7 +7,7 @@ import discord
 from discord import app_commands
 from discord.ext import tasks
 
-from util import client, tree, send_error, log_command, ALL
+from util import client, tree, send_error, log_command, ALL, TEST
 
 
 @tree.command(  # type: ignore[arg-type]
