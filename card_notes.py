@@ -4,7 +4,7 @@ import re
 import discord
 from discord import app_commands
 
-from util import client, tree, send_error, send_long_msg, log_command, ALL
+from util import client, tree, send_error, send_long_msg, log_command, TEST, ALL
 from database import _get_all_db, _get_one_db, _set_db
 
 
@@ -24,7 +24,7 @@ async def card_autocomplete(interaction: discord.Interaction, current: str) -> l
 @tree.command(  # type: ignore[arg-type]
     name="add_card_note",
     description="Record notes on a limited card",
-    guilds=ALL
+    guilds=TEST
 )
 @app_commands.check(log_command)
 @app_commands.autocomplete(card=card_autocomplete)
@@ -46,7 +46,7 @@ async def add_card_note(interaction: discord.Interaction, your_name: str, card: 
 @tree.command(  # type: ignore[arg-type]
     name="card_notes",
     description="Get all notes on a limited card",
-    guilds=ALL
+    guilds=TEST
 )
 @app_commands.check(log_command)
 @app_commands.autocomplete(card=card_autocomplete)
