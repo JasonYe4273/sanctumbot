@@ -76,17 +76,26 @@ async def notes(interaction: discord.Interaction, player: str, opponent: str, de
     guilds=ALL
 )
 @app_commands.check(log_command)
-async def search_notes(interaction: discord.Interaction, deck: str):
+async def search_notes(interaction: discord.Interaction, deck: str, deck2: str=""):
     deck = deck.lower()
+    deck2 = deck2.lower()
 
-    notes = _get_all_db(f"SELECT message,player,opponent,deck1,deck2,winloss,recorded_at FROM notes WHERE server={interaction.guild_id} AND (deck1='{deck}' OR deck2='{deck}')")
-    if len(notes) == 0:
-        await interaction.response.send_message(f"No testing notes found for {deck}")
-        return
+    if deck2:
+        notes = _get_all_db(f"SELECT message,player,opponent,deck1,deck2,winloss,recorded_at FROM notes WHERE server={interaction.guild_id} AND ((deck1='{deck}' AND deck2='{deck2}') OR (deck1='{deck2}' AND deck2='{deck}'))")
+        if len(notes) == 0:
+            await interaction.response.send_message(f"No testing notes found for {deck} vs {deck2}")
+            return
+        msg = f"{len(notes)} sets of testing notes found for {deck} vs {deck2}:\n"
+    else:
+        notes = _get_all_db(f"SELECT message,player,opponent,deck1,deck2,winloss,recorded_at FROM notes WHERE server={interaction.guild_id} AND (deck1='{deck}' OR deck2='{deck}')")
+        if len(notes) == 0:
+            await interaction.response.send_message(f"No testing notes found for {deck}")
+            return
+        msg = f"{len(notes)} sets of testing notes found for {deck}:\n"
 
-    msg = f"{len(notes)} sets of testing notes found for {deck}:\n"
     for note in notes:
         msg += f"- {note[1]} on {note[3]} vs {note[2]} on {note[4]} ({note[5]}) @ <t:{note[6]}:s>: {note[0]}\n"
+        
     await send_long_msg(interaction, msg)
 
 
