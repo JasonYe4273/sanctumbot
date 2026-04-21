@@ -158,7 +158,6 @@ async def update_deck_names(server: int):
     guilds=ALL
 )
 @app_commands.check(log_command)
-@app_commands.checks.has_permissions(administrator=True)
 async def edit_notes(interaction: discord.Interaction, link: str, player: str="", opponent: str="", deck1: str="", deck2: str="", winloss: str=""):
     if not interaction.guild_id:
         await send_error(interaction, "Can't find server")
