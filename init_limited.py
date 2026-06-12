@@ -32,18 +32,19 @@ async def init_limited(interaction: discord.Interaction, setcode: str):
   await interaction.response.send_message("Working...", ephemeral=True)
   
   channel_cards = [
-    ["Rares and Mythics", "r>u"],
-    ["White Commons", "r%3Dc+c%3Dw"],
-    ["White Uncommons", "r%3Du+c%3Dw"],
-    ["Blue Commons", "r%3Dc+c%3Du"],
-    ["Blue Uncommons", "r%3Du+c%3Du"],
-    ["Black Commons", "r%3Dc+c%3Db"],
-    ["Black Uncommons", "r%3Du+c%3Db"],
-    ["Red Commons", "r%3Dc+c%3Dr"],
-    ["Red Uncommons", "r%3Du+c%3Dr"],
-    ["Green Commons", "r%3Dc+c%3Dg"],
-    ["Green Uncommons", "r%3Du+c%3Dg"],
-    ["Colorless U/Cs", "r<r+c%3D0+-t%3Aland"],
+    # ["Rares and Mythics", "r>u"],
+    # ["White Commons", "r%3Dc+c%3Dw"],
+    # ["White Uncommons", "r%3Du+c%3Dw"],
+    # ["Blue Commons", "r%3Dc+c%3Du"],
+    # ["Blue Uncommons", "r%3Du+c%3Du"],
+    # ["Black Commons", "r%3Dc+c%3Db"],
+    # ["Black Uncommons", "r%3Du+c%3Db"],
+    # ["Red Commons", "r%3Dc+c%3Dr"],
+    # ["Red Uncommons", "r%3Du+c%3Dr"],
+    # ["Green Commons", "r%3Dc+c%3Dg"],
+    # ["Green Uncommons", "r%3Du+c%3Dg"],
+    # ["Colorless U/Cs", "r<r+c%3D0+-t%3Aland"],
+    ["Multicolor Uncommons", "r%3Du+c>1"]
   ]
 
   async def category_init(query: str, name: str):
@@ -64,7 +65,7 @@ async def init_limited(interaction: discord.Interaction, setcode: str):
 
   for i in range(len(channel_cards)):
     await category_init(f'e%3A{code}+{channel_cards[i][1]}', f'{code} {channel_cards[i][0]}')
-  await category_init(f'e%3AMAR+cn>40+lang%3Aen', f'MAR Bonus Sheet')
+  # await category_init(f'e%3AMAR+cn>40+lang%3Aen', f'MAR Bonus Sheet')
 
 
 
