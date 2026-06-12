@@ -7,7 +7,7 @@ import discord
 from discord import app_commands
 from discord.ext import tasks
 
-from util import client, tree, send_error, log_command, ALL, TEST
+from util import client, tree, send_error, log_command, ALL, TEST, headers
 
 
 @tree.command(  # type: ignore[arg-type]
@@ -47,7 +47,7 @@ async def init_limited(interaction: discord.Interaction, setcode: str):
   ]
 
   async def category_init(query: str, name: str):
-    cards = requests.get(f'https://api.scryfall.com/cards/search?q={query}').json()["data"]
+    cards = requests.get(f'https://api.scryfall.com/cards/search?q={query}', headers=headers).json()["data"]
     category = await guild.create_category(name)
     j = 0
     n = 1

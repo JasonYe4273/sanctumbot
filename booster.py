@@ -7,7 +7,7 @@ import discord
 from discord import app_commands
 from discord.ext import tasks
 
-from util import client, tree, send_error, log_command, ALL
+from util import client, tree, send_error, log_command, ALL, headers
 from database import _get_all_db, _get_one_db, _set_db
 
 SEALED_DATA = dict()

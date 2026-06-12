@@ -22,6 +22,8 @@ TEST = discord.Object(id=TEST_ID)
 OTHERS = [discord.Object(id=int(i)) for i in OTHER_IDS.split(',')]
 ALL = [SANCTUM,PT,TEST] + OTHERS
 
+headers = {"User-Agent": "SanctumBot/1.0"}
+
 
 async def send_error(interaction: discord.Interaction, message: str):
     if interaction and not interaction.response.is_done():

@@ -20,7 +20,7 @@ def get_card_name(card: dict) -> str:
 def query_scryfall(raw_card_name: str) -> dict:
     # Try get unique card from Scryfall
     try:
-        response = requests.get(f'https://api.scryfall.com/cards/named?fuzzy={raw_card_name}').json()
+        response = requests.get(f'https://api.scryfall.com/cards/named?fuzzy={raw_card_name}', headers=headers).json()
         if response['object'] == 'error':
             if response['details'][:20] == 'Too many cards match':
                 return {'error': f'Error: multiple card matches for "{raw_card_name}"'}
