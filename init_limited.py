@@ -43,7 +43,7 @@ async def init_limited(interaction: discord.Interaction, setcode: str):
     # ["Red Uncommons", "r%3Du+c%3Dr"],
     # ["Green Commons", "r%3Dc+c%3Dg"],
     # ["Green Uncommons", "r%3Du+c%3Dg"],
-    # ["Colorless U/Cs", "r<r+c%3D0+-t%3Aland"],
+    ["Colorless U/Cs", "r<r+c%3D0+-t%3Abasic"],
     ["Multicolor Uncommons", "r%3Du+c>1"]
   ]
 
