@@ -1,5 +1,5 @@
 UPDATING_SETS: list[str] = ['MSH']
-OLD_SETS: list[str] = ['SOS', 'ECL']
+OLD_SETS: list[str] = ['SOS', 'ECL', 'DMU']
 SETS: list[str] = UPDATING_SETS + OLD_SETS
 START_DATE: str = '2025-01-01'
 DEFAULT_FORMAT: str = 'PremierDraft'
