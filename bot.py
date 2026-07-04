@@ -42,8 +42,6 @@ async def on_message(message: Message) -> None:
     if message.author == client.user:
         return
 
-    print(message.guild.id)
-    print(type(message.guild.id))
     if message.guild.id in MAGIC_IDS:
         # Handle data queries of the form '{{query | options}}'
         if (DATA_QUERY_L in message.content) and (DATA_QUERY_R in message.content):
