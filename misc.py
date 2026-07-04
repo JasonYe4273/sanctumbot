@@ -3,7 +3,7 @@ from math import comb
 import discord
 from discord import app_commands
 
-from util import client, tree, send_error, log_command, ALL
+from util import client, tree, send_error, log_command, ALL, MAGIC
 from database import _get_all_db, _get_one_db, _set_db
 
 
@@ -67,7 +67,7 @@ P(X > {k}) = {gt:.2f}%```
 @tree.command(  # type: ignore[arg-type]
     name="mana",
     description="Karsten mana number for this mana cost",
-    guilds=ALL
+    guilds=MAGIC
 )
 @app_commands.check(log_command)
 async def mana(interaction: discord.Interaction, cost: str):

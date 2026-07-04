@@ -7,7 +7,7 @@ import discord
 from discord import app_commands
 from discord.ext import tasks
 
-from util import client, tree, send_error, log_command, ALL, headers
+from util import client, tree, send_error, log_command, MAGIC, headers
 from database import _get_all_db, _get_one_db, _set_db
 
 SEALED_DATA = dict()
@@ -126,7 +126,7 @@ async def generate_pack(interaction: Optional[discord.Interaction], setcode: str
 @tree.command(  # type: ignore[arg-type]
     name="create_p1p1_loop",
     description="[ADMIN ONLY] Create a p1p1 task loop in this channel",
-    guilds=ALL
+    guilds=MAGIC
 )
 @app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
@@ -153,7 +153,7 @@ async def create_p1p1_loop(interaction: discord.Interaction, setcode: str, minut
 @tree.command(  # type: ignore[arg-type]
     name="delete_p1p1_loop",
     description="[ADMIN ONLY] Delete all p1p1 task loops of a set from this channel",
-    guilds=ALL
+    guilds=MAGIC
 )
 @app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
@@ -170,7 +170,7 @@ async def delete_p1p1_loop(interaction: discord.Interaction, setcode: str):
 @tree.command(  # type: ignore[arg-type]
     name="p1p1",
     description="Pack 1 Pick 1 from the specified set",
-    guilds=ALL
+    guilds=MAGIC
 )
 @app_commands.check(log_command)
 async def p1p1(interaction: discord.Interaction, setcode: str):
@@ -190,7 +190,7 @@ async def p1p1(interaction: discord.Interaction, setcode: str):
 @tree.command(  # type: ignore[arg-type]
     name="generate_draft",
     description="Generate 24 packs from the specified set",
-    guilds=ALL
+    guilds=MAGIC
 )
 @app_commands.check(log_command)
 async def generate_draft(interaction: discord.Interaction, setcode: str):

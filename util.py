@@ -3,12 +3,13 @@ import discord
 from discord import app_commands
 
 try:
-    from secrets import TOKEN, BOT_ID, SANCTUM_ID, PT_SERVER_ID, TEST_ID  # type: ignore[attr-defined]
+    from secrets import TOKEN, BOT_ID, SANCTUM_ID, PT_SERVER_ID, RIFTBOUND_ID, TEST_ID  # type: ignore[attr-defined]
 except:
     TOKEN = os.environ.get('TOKEN', '')
     BOT_ID = os.environ.get('BOT_ID', '')
     SANCTUM_ID = os.environ.get('SANCTUM_ID', '')
     PT_SERVER_ID = os.environ.get('PT_SERVER_ID', '')
+    RIFTBOUND_ID = os.environ.get('RIFTBOUND_ID', '')
     TEST_ID = os.environ.get('TEST_ID', '')
     OTHER_IDS = os.environ.get('OTHER_IDS', '')
 
@@ -20,7 +21,9 @@ SANCTUM = discord.Object(id=SANCTUM_ID)
 PT = discord.Object(id=PT_SERVER_ID)
 TEST = discord.Object(id=TEST_ID)
 OTHERS = [discord.Object(id=int(i)) for i in OTHER_IDS.split(',')]
-ALL = [SANCTUM,PT,TEST] + OTHERS
+MAGIC = [SANCTUM,PT,TEST] + OTHERS
+RIFTBOUND = discord.Object(id=RIFTBOUND_ID)
+ALL = MAGIC + [RIFTBOUND]
 
 headers = {"User-Agent": "SanctumBot/1.0"}
 

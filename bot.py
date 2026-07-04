@@ -3,7 +3,7 @@ from discord import app_commands, Message
 from discord.ext import tasks
 
 from database import con, cur, _get_one_db, _get_all_db, _set_db
-from util import client, tree, send_error, TOKEN, ALL
+from util import client, tree, send_error, TOKEN, ALL, MAGIC
 
 import misc
 import tournaments
@@ -42,13 +42,14 @@ async def on_message(message: Message) -> None:
     if message.author == client.user:
         return
 
-    # Handle data queries of the form '{{query | options}}'
-    if (DATA_QUERY_L in message.content) and (DATA_QUERY_R in message.content):
-        await handle_card_request_v2(message.content, message.channel)
+    if message.guild_id in MAGIC:
+        # Handle data queries of the form '{{query | options}}'
+        if (DATA_QUERY_L in message.content) and (DATA_QUERY_R in message.content):
+            await handle_card_request_v2(message.content, message.channel)
 
-    # Only parse messages that start with command string '17!'
-    if message.content.startswith(COMMAND_STR):
-        await handle_command(message.content, message.channel)
+        # Only parse messages that start with command string '17!'
+        if message.content.startswith(COMMAND_STR):
+            await handle_command(message.content, message.channel)
 
 
 @client.event
