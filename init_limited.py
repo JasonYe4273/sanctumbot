@@ -13,7 +13,7 @@ from util import client, tree, send_error, log_command, ALL, TEST, headers
 @tree.command(  # type: ignore[arg-type]
     name="init_limited",
     description="[ADMIN ONLY] Initialize limited channels for a set. WARNING: will make 300+ channels.",
-    guilds=TEST
+    guilds=[TEST]
 )
 @app_commands.check(log_command)
 @app_commands.checks.has_permissions(administrator=True)
