@@ -3,7 +3,7 @@ from discord import app_commands, Message
 from discord.ext import tasks
 
 from database import con, cur, _get_one_db, _get_all_db, _set_db
-from util import client, tree, send_error, TOKEN, ALL, MAGIC
+from util import client, tree, send_error, TOKEN, ALL, MAGIC, MAGIC_IDS
 
 import misc
 import tournaments
@@ -44,7 +44,7 @@ async def on_message(message: Message) -> None:
 
     print(message.guild.id)
     print(type(message.guild.id))
-    if message.guild.id in MAGIC:
+    if message.guild.id in MAGIC_IDS:
         # Handle data queries of the form '{{query | options}}'
         if (DATA_QUERY_L in message.content) and (DATA_QUERY_R in message.content):
             await handle_card_request_v2(message.content, message.channel)

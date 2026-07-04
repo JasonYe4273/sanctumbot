@@ -25,6 +25,8 @@ MAGIC = [SANCTUM,PT,TEST] + OTHERS
 RIFTBOUND = discord.Object(id=RIFTBOUND_ID)
 ALL = MAGIC + [RIFTBOUND]
 
+MAGIC_IDS = [m.id for m in MAGIC]
+
 headers = {"User-Agent": "SanctumBot/1.0"}
 
 
