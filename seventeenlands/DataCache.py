@@ -18,21 +18,19 @@ class DataCache:
             cls.CACHE[s] = {f: {} for f in FORMATS}
             for f in FORMATS:
                 success = False
-                while not success:
-                    try:
-                        print(f'Fetching data for {s} {f}...')
-                        response = requests.get(
-                            'https://www.17lands.com/card_ratings/data?' +
-                            f'expansion={s}&format={f}&time_period=ALL_TIME'
-                        )
-                        for c in response.json():
-                            cls.CACHE[s][f][c['name']] = c
-                        success = True
-                        print('Success!')
-                        time.sleep(30)
-                    except Exception:
-                        print('Failed; trying again in 30s')
-                        time.sleep(30)
+                try:
+                    print(f'Fetching data for {s} {f}...')
+                    response = requests.get(
+                        'https://www.17lands.com/card_ratings/data?' +
+                        f'expansion={s}&format={f}&time_period=ALL_TIME'
+                    )
+                    for c in response.json():
+                        cls.CACHE[s][f][c['name']] = c
+                    success = True
+                    print('Success!')
+                    time.sleep(2)
+                except Exception:
+                    print('Failed')
 
     @classmethod
     def __class_getitem__(cls, set_code) -> dict:
