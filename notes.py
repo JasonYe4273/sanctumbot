@@ -136,19 +136,23 @@ async def reload_deck_names(interaction: discord.Interaction):
 
 
 async def update_deck_names(server: int):
-    mid = _get_one_db(f"SELECT message FROM deck_names WHERE server={server}")[0]
-    cid = _get_one_db(f"SELECT channel FROM deck_names WHERE server={server}")[0]
-    channel: discord.TextChannel = client.get_channel(cid)  # type: ignore[assignment]
-    message: discord.Message = await channel.fetch_message(mid)
+    mid = _get_one_db(f"SELECT message FROM deck_names WHERE server={server}")
+    cid = _get_one_db(f"SELECT channel FROM deck_names WHERE server={server}")
 
-    if message:
-        decks = get_deck_names(server)
+    if not mid or not cid or len(mid) == 0 or len(cid) == 0:
+        return
 
-        msg = "# List of Deck Names:\n"
-        for d in sorted([k for k in decks], key=lambda x: -decks[x]):
-            msg += f"- {d} ({decks[d]} notes)\n"
+    channel: discord.TextChannel = client.get_channel(cid[0])  # type: ignore[assignment]
+    if channel:
+        message: discord.Message = await channel.fetch_message(mid[0])
+        if message:
+            decks = get_deck_names(server)
 
-        await message.edit(content=msg)
+            msg = "# List of Deck Names:\n"
+            for d in sorted([k for k in decks], key=lambda x: -decks[x]):
+                msg += f"- {d} ({decks[d]} notes)\n"
+
+            await message.edit(content=msg)
 
 
 
