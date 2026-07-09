@@ -65,8 +65,8 @@ def get_data_to_use(set_code: str, formats: list[str], query_str: str, use_cache
                 DataCache[set_code][f'{f}{query_str}'] = dict()  # type: ignore[misc]
                 print(f'Fetching data for {set_code} {f} with query {query_str}...')
                 response = requests.get(
-                    'https://www.17lands.com/card_ratings/data?' +
-                    f'expansion={set_code}&format={f}{query_str}'
+                    'https://www.17lands.com/api/card_data?' +
+                    f'expansion={s}&event_type={f}{query_str}'
                 )
                 for c in response.json():
                     data_to_use[f][c['name']] = c

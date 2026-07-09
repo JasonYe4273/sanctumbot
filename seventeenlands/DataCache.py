@@ -21,8 +21,8 @@ class DataCache:
                 try:
                     print(f'Fetching data for {s} {f}...')
                     response = requests.get(
-                        'https://www.17lands.com/card_ratings/data?' +
-                        f'expansion={s}&format={f}&time_period=ALL_TIME'
+                        'https://www.17lands.com/api/card_data?' +
+                        f'expansion={s}&event_type={f}&time_period=ALL_TIME'
                     )
                     for c in response.json():
                         cls.CACHE[s][f][c['name']] = c
