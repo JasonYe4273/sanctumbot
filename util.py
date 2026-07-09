@@ -9,7 +9,7 @@ except:
     BOT_ID = os.environ.get('BOT_ID', '')
     SANCTUM_ID = os.environ.get('SANCTUM_ID', '')
     PT_SERVER_ID = os.environ.get('PT_SERVER_ID', '')
-    RIFTBOUND_ID = os.environ.get('RIFTBOUND_ID', '')
+    RIFTBOUND_IDS = os.environ.get('RIFTBOUND_IDS', '')
     TEST_ID = os.environ.get('TEST_ID', '')
     OTHER_IDS = os.environ.get('OTHER_IDS', '')
 
@@ -22,8 +22,8 @@ PT = discord.Object(id=PT_SERVER_ID)
 TEST = discord.Object(id=TEST_ID)
 OTHERS = [discord.Object(id=int(i)) for i in OTHER_IDS.split(',')]
 MAGIC = [SANCTUM,PT,TEST] + OTHERS
-RIFTBOUND = discord.Object(id=RIFTBOUND_ID)
-ALL = MAGIC + [RIFTBOUND]
+RIFTBOUND = [discord.Object(id=int(i)) for i in RIFTBOUND_IDS.split(',')]
+ALL = MAGIC + RIFTBOUND
 
 MAGIC_IDS = [m.id for m in MAGIC]
 
