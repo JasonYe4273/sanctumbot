@@ -23,6 +23,7 @@ class DataCache:
                     url = 'https://www.17lands.com/api/card_data?' + f'expansion={s}&event_type={f}&time_period=ALL_TIME'
                     print(f'URL: {url}')
                     response = requests.get(url)
+                    print(response.json())
                     for c in response.json():
                         cls.CACHE[s][f][c['name']] = c
                     success = True
