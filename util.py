@@ -32,7 +32,8 @@ RIFTBOUND_LEGENDS = [
     "annie", "lux", "master yi", "garen",
     "rumble", "lucian", "draven", "reksai", "ornn", "jax", "irelia", "azir", "ezreal", "renata glasc", "sivir", "fiora",
     "jhin", "rengar", "pyke", "vi", "lilia", "master yi wm", "vex", "ivern", "diana", "leblanc", "khazix", "poppy"
-    "kennen", "akali", "renekton", "zed", "mel", "ambessa"]
+    "kennen", "akali", "renekton", "zed", "mel", "ambessa"
+]
 
 headers = {"User-Agent": "SanctumBot/1.0"}
 

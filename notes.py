@@ -32,7 +32,7 @@ for s in ALL:
     deck_appearances = get_deck_names(s.id)
     for l in RIFTBOUND_LEGENDS:
         if l not in deck_appearances:
-            deck_appearances.append(l)
+            deck_appearances[l] = 0
     DECKNAME_CACHE[s.id] = sorted([k for k in deck_appearances], key=lambda k: -deck_appearances[k])
 
 
