@@ -30,9 +30,10 @@ def get_deck_names(server: int):
 
 for s in ALL:
     deck_appearances = get_deck_names(s.id)
-    for l in RIFTBOUND_LEGENDS:
-        if l not in deck_appearances:
-            deck_appearances[l] = 0
+    if s in RIFTBOUND:
+        for l in RIFTBOUND_LEGENDS:
+            if l not in deck_appearances:
+                deck_appearances[l] = 0
     DECKNAME_CACHE[s.id] = sorted([k for k in deck_appearances], key=lambda k: -deck_appearances[k])
 
 
