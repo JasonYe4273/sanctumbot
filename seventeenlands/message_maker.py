@@ -83,20 +83,13 @@ async def send_card_call_response(card_call: CardParseData, channel) -> None:
     use_cache = True
     query_str = ''
 
-    if card_call.OPTIONS.START_DATE != date(2020, 1, 1):
-        use_cache = False
-
-    if card_call.OPTIONS.END_DATE != date.today():
-        use_cache = False
-
     if len(card_call.OPTIONS.COLORS) == 1:  # type: ignore[arg-type]
         use_cache = False
         colors = card_call.OPTIONS.COLORS[0]  # type: ignore[index]
 
     if not use_cache:
         # Calculate 17lands query string
-        query_str = f'&start_date={str(card_call.OPTIONS.START_DATE)}&' \
-                    f'end_date={str(card_call.OPTIONS.END_DATE)}'
+        query_str = f'&time_period=ALL_TIME'
         if colors:
             query_str += f'&colors={colors}'
 
@@ -116,8 +109,7 @@ async def send_card_call_response(card_call: CardParseData, channel) -> None:
                 data=data_to_use,
                 formats=card_call.OPTIONS.FORMATS,  # type: ignore[arg-type]
                 fields=card_call.OPTIONS.STATS,  # type: ignore[arg-type]
-                start_date=str(card_call.OPTIONS.START_DATE),
-                end_date=str(card_call.OPTIONS.END_DATE),
+                time_period="All Time",
                 color_filter=(colors if colors else "None")
             ))
         except Exception:

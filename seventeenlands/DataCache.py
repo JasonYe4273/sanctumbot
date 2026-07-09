@@ -2,12 +2,11 @@ import requests
 import time
 from datetime import date
 
-from seventeenlands.utils.settings import SETS, FORMATS, START_DATE
+from seventeenlands.utils.settings import SETS, FORMATS
 
 
 class DataCache:
     CACHE: dict = {s: {f: {} for f in FORMATS} for s in SETS}
-    print(CACHE)
 
     @classmethod
     def fetch_data(cls, sets: list[str]) -> None:
@@ -24,12 +23,13 @@ class DataCache:
                         print(f'Fetching data for {s} {f}...')
                         response = requests.get(
                             'https://www.17lands.com/card_ratings/data?' +
-                            f'expansion={s}&format={f}&start_date={START_DATE}&end_date={date.today()}'
+                            f'expansion={s}&format={f}&time_period=ALL_TIME'
                         )
                         for c in response.json():
                             cls.CACHE[s][f][c['name']] = c
                         success = True
                         print('Success!')
+                        time.sleep(30)
                     except Exception:
                         print('Failed; trying again in 30s')
                         time.sleep(30)

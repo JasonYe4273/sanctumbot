@@ -12,15 +12,6 @@ class CardParseOptions:
     # If this is in the opt_str, then use verbose.
     verbose_re = re.compile(r'([Vv]erbose ?|-[Vv])', re.IGNORECASE)
 
-    # There should only be one of each of these.
-    start_re = re.compile(r'([Ss]tart|-[Ss])=((?:[0-9][0-9](?:[0-9][0-9])?-)?[0-9][0-9]-[0-9][0-9])', re.IGNORECASE)
-    end_re = re.compile(r'([Ee]nd|-[Ee])=((?:[0-9][0-9](?:[0-9][0-9])?-)?[0-9][0-9]-[0-9][0-9])', re.IGNORECASE)
-
-    # There should likely only be one of any of these.
-    month_re = re.compile(r'([Mm]onths?|-[Mm])=([0-9]*)', re.IGNORECASE)
-    week_re = re.compile(r'([Ww]eeks?|-[Ww])=([0-9]*)', re.IGNORECASE)
-    day_re = re.compile(r'([Dd]ays?|-[Dd])=([0-9]*)', re.IGNORECASE)
-
     # This could happen more than once, and could be a comma separated list of colour aliases
     color_re = re.compile(r'([Cc]olou?rs?|-[Cc])=([WUBRGwubrg, ]*(?: |$))', re.IGNORECASE)
 
@@ -37,15 +28,12 @@ class CardParseOptions:
         self.OPTIONS_STR: str = options
         self.PARSED: bool = self.OPTIONS_STR == ''
         self.VERBOSE: bool = False
-        self.START_DATE: Optional[date] = None
-        self.END_DATE: Optional[date] = None
         self.COLORS: Optional[list[str]] = None
         self.FORMATS: Optional[list[str]] = None
         self.STATS: Optional[list[str]] = None
         self.SET: Optional[str] = None
 
         self._handle_verbose()
-        self._handle_date_range()
         self._handle_color_filter()
         self._handle_format_filter()
         self._handle_set_override()
@@ -53,23 +41,6 @@ class CardParseOptions:
 
         if not self.PARSED:
             print(f"Could not parse options '{self.OPTIONS_STR}'!")
-
-    @staticmethod
-    def _parse_date(date_str):
-        try:
-            date_lst = date_str.split('-')
-            if len(date_lst) == 2:
-                year = datetime.today().year
-                month, day = date_lst
-            else:
-                year, month, day = date_lst
-                if len(year) == 2:
-                    year = '20' + year
-
-            return date(int(year), int(month), int(day))
-        except Exception as e:
-            print(e)
-            return None
 
     @staticmethod
     def _parse_list_match(match_str: str):
@@ -98,56 +69,6 @@ class CardParseOptions:
         if self.VERBOSE:
             self.PARSED = True
             print("Verbose Mode enabled.")
-
-    def _handle_date_range(self):
-        """ Handles self.START_DATE and self.END_DATE"""
-        # Find the flags for start and end dates.
-        start_match = self.start_re.search(self.OPTIONS_STR)
-        end_match = self.end_re.search(self.OPTIONS_STR)
-
-        if self.VERBOSE:
-            print(f"start_match: {start_match is not None}")
-            print(f"end_match: {end_match is not None}")
-
-        # If both a start or end date exists, use them for the range.
-        if start_match or end_match:
-            self.PARSED = True
-            # Set found values
-            if start_match:
-                self.START_DATE = self._parse_date(start_match.group(2))
-            if end_match:
-                self.END_DATE = self._parse_date(end_match.group(2))
-        # If neither exist, check for a time offset flag.
-        else:
-            self.handle_time_offset()
-
-    def handle_time_offset(self) -> None:
-        """ Handles self.START_DATE and self.END_DATE """
-        # Find the flags for day, week or month offsets.
-        day_match = self.day_re.search(self.OPTIONS_STR)
-        week_match = self.week_re.search(self.OPTIONS_STR)
-        month_match = self.month_re.search(self.OPTIONS_STR)
-
-        if self.VERBOSE:
-            print(f"day_match: {day_match is not None}")
-            print(f"week_match: {week_match is not None}")
-            print(f"month_match: {month_match is not None}")
-
-        # There are any matches, set the date range.
-        if day_match or week_match or month_match:
-            self.PARSED = True
-            self.END_DATE = date.today()
-
-            # Use the first time period found, and base the start date on that.
-            if day_match:
-                days = int(day_match.group(2))
-                self.START_DATE = self.END_DATE - timedelta(days=days)
-            elif week_match:
-                weeks = int(week_match.group(2))
-                self.START_DATE = self.END_DATE - timedelta(weeks=weeks)
-            elif month_match:
-                months = int(month_match.group(2))
-                self.START_DATE = self.END_DATE - timedelta(days=months * 30)
 
     def _handle_color_filter(self):
         # Get the list of colours to display stats for, if it exists.
@@ -278,14 +199,6 @@ class CardParseData:
         if not self.OPTIONS.SET:
             # TODO: Search through the sets and find the most recent set in which the card was printed.
             self.OPTIONS.SET = self.CARD_DATA['set'].upper()
-
-        if not self.OPTIONS.START_DATE:
-            if self.OPTIONS.SET:
-                # TODO: Set this to the start of the set.
-                self.OPTIONS.START_DATE = date(2020, 1, 1)
-
-        if not self.OPTIONS.END_DATE:
-            self.OPTIONS.END_DATE = date.today()
 
 
 class MessageParseData:
