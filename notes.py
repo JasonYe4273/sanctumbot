@@ -218,7 +218,7 @@ async def edit_notes(interaction: discord.Interaction, link: str, player: str=""
 
 @tree.command(  # type: ignore[arg-type]
     name="delete_notes",
-    description="Delete Testing Notes",
+    description="[ADMIN ONLY] Delete Testing Notes",
     guilds=ALL
 )
 @app_commands.check(log_command)
