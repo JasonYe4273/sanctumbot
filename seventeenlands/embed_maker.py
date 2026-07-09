@@ -41,7 +41,7 @@ def new_data_embed(title: str, description: str = "", url: str = "") -> discord.
 
 
 def gen_card_embed(card: dict, set_code: str, data: dict, formats: list[str], fields: list[str],
-                   start_date: str, end_date: str, color_filter: str = "None") -> discord.Embed:
+                   time_period: str, color_filter: str = "None") -> discord.Embed:
     """
     Returns an embed which displays the game stats about a particular card.
     :param card: The json of the card.
@@ -67,7 +67,7 @@ def gen_card_embed(card: dict, set_code: str, data: dict, formats: list[str], fi
     embed = new_data_embed(title, url=f"https://www.17lands.com/card_data/details?card_id={data[formats[0]][stored_name]['mtga_id']}&expansion={set_code}")
 
     # Generate a field to show the scope of the data.
-    date_range = f"Date Range:\t\t {start_date} to {end_date}" + '\r\n'
+    time_period = f"Time Period: {time_period}" + '\r\n'
 
     print(f"color_filter: {color_filter}")
     filter_emojis = Manamoji.emojify_color_string(color_filter)
@@ -76,7 +76,7 @@ def gen_card_embed(card: dict, set_code: str, data: dict, formats: list[str], fi
     filter_str = "Colour filter: \t\t" + filter_emojis + '\r\n'
     # TODO: fetch color win_rate from 17lands
     color_win_rate = ""  # "Avg. " + WUBRG.emojify_color_id(color_filter) + " Win Rate: \t" + "%00.00" + '\r\n'
-    embed.add_field(name="Data Info", value=date_range + filter_str + color_win_rate, inline=False)
+    embed.add_field(name="Data Info", value=time_period + filter_str + color_win_rate, inline=False)
 
     # Generate a field which acts as the labels for the data.
     # SET = WUBRG.get_emoji("ELD") # TODO: Find and add set emojis to the sever to use with WUBRG.py
@@ -191,15 +191,6 @@ def gen_card_embeds_v2(card_info, data, start_date=None, end_date=None):
     mana_cost = card_info['mana_cost']
     name = card_info['name']
     stored_name = card_info['stored_name']
-
-    ##    # Generate a field to show the scope of the data.
-    ##    if start_date is None:
-    ##        default = SET_CONFIG[s][formats[0]]['StartDate']
-    ##        start_date = default if default is not None else DEFAULT_START_DATE
-    ##    if end_date is None:
-    ##        default = SET_CONFIG[s][formats[0]]['EndDate']
-    ##        end_date = default if default is not None else date.today()
-    ##    date_range = f"Date Range:\t\t {start_date} to {end_date}"  + '\r\n'
 
     # TODO: fetch color winrate from 17lands
 
