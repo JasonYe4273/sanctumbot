@@ -27,6 +27,13 @@ ALL = MAGIC + RIFTBOUND
 
 MAGIC_IDS = [m.id for m in MAGIC]
 
+RIFTBOUND_LEGENDS = [
+    "kaisa", "volibear", "jinx", "darius", "ahri", "lee sin", "yasuo", "leona", "teemo", "viktor", "miss fortune", "sett",
+    "annie", "lux", "master yi", "garen",
+    "rumble", "lucian", "draven", "reksai", "ornn", "jax", "irelia", "azir", "ezreal", "renata glasc", "sivir", "fiora",
+    "jhin", "rengar", "pyke", "vi", "lilia", "master yi wm", "vex", "ivern", "diana", "leblanc", "khazix", "poppy"
+    "kennen", "akali", "renekton", "zed", "mel", "ambessa"]
+
 headers = {"User-Agent": "SanctumBot/1.0"}
 
 

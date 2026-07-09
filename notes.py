@@ -4,7 +4,7 @@ import re
 import discord
 from discord import app_commands
 
-from util import client, tree, send_error, send_long_msg, log_command, ALL
+from util import client, tree, send_error, send_long_msg, log_command, ALL, RIFTBOUND, RIFTBOUND_LEGENDS
 from database import _get_all_db, _get_one_db, _set_db
 
 
@@ -30,6 +30,9 @@ def get_deck_names(server: int):
 
 for s in ALL:
     deck_appearances = get_deck_names(s.id)
+    for l in RIFTBOUND_LEGENDS:
+        if l not in deck_appearances:
+            deck_appearances.append(l)
     DECKNAME_CACHE[s.id] = sorted([k for k in deck_appearances], key=lambda k: -deck_appearances[k])
 
 
