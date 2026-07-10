@@ -236,7 +236,7 @@ class CardParseOptions:
             color_val = get_color_identity(val)
             if color_val != '' and color_val in COLOR_COMBINATIONS:
                 self.PARSED = True
-                self.COLORS = [color_val]
+                self.COLORS = color_val
                 if self.VERBOSE:
                     print(f"Setting COLORS to {self.COLORS}, from single_arg")
 
