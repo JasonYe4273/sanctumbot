@@ -4,7 +4,7 @@ from datetime import date, timedelta, datetime
 
 from seventeenlands.WUBRG import FAILSAFE, COLOR_COMBINATIONS, get_color_identity, get_color_supersets
 from seventeenlands.utils.consts import STAT_ALIASES, DEFAULT_STATS
-from seventeenlands.utils.settings import FORMAT_MAPPINGS, DEFAULT_FORMAT, SETS
+from seventeenlands.utils.settings import FORMAT_MAPPINGS, DEFAULT_FORMAT, SETS, ALL_17L_SETS
 from seventeenlands.utils.utils import query_scryfall
 
 
@@ -12,8 +12,14 @@ class CardParseOptions:
     # If this is in the opt_str, then use verbose.
     verbose_re = re.compile(r'([Vv]erbose ?|-[Vv])', re.IGNORECASE)
 
-    # This could happen more than once, and could be a comma separated list of colour aliases
-    color_re = re.compile(r'([Cc]olou?rs?|-[Cc])=([WUBRGMCwubrgmc, ]*(?: |$))', re.IGNORECASE)
+    # Deck color option should only happen once
+    color_re = re.compile(r'([Cc]olou?rs?|-[Cc])=([WUBRGwubrg]*)', re.IGNORECASE)
+
+    # User group option should only happen once
+    users_re = re.compile(r'([Uu]sers?|-[Uu])=(top|bottom|middle)', re.IGNORECASE)
+
+    # Time option should only happen once
+    time_re = re.compile(r'([Tt]ime|-[Tt])=(firstweek|notfirstweek|lasttwoweeks|lastweek|lastday)', re.IGNORECASE)
 
     # This could happen more than once, and could be a comma separated list of format aliases
     format_re = re.compile(r'([Ff]ormats?|-[Ff])=([a-zA-Z0-9, ]*(?: |$))', re.IGNORECASE)
@@ -22,6 +28,7 @@ class CardParseOptions:
     stats_re = re.compile(r'([Ss]tats?|[Cc]olumns?)=([a-zA-Z0-9, ]*(?: |$))', re.IGNORECASE)
 
     # This should happen once, and be a 3 character string of letters and numbers.
+    # TODO: allow matching other set name lengths
     set_re = re.compile(r'([Ss]et)=([a-zA-Z0-9]{3})', re.IGNORECASE)
 
     def __init__(self):
@@ -29,6 +36,8 @@ class CardParseOptions:
         self.PARSED: bool = True
         self.VERBOSE: bool = False
         self.COLORS: Optional[str] = None
+        self.USERS: Optional[str] = None
+        self.TIME: Optional[str] = None
         self.FORMATS: Optional[list[str]] = None
         self.STATS: Optional[list[str]] = None
         self.SET: Optional[str] = None
@@ -39,6 +48,8 @@ class CardParseOptions:
 
         self._handle_verbose()
         self._handle_color_filter()
+        self._handle_user_group()
+        self._handle_time_period()
         self._handle_format_filter()
         self._handle_set_override()
         self._handle_single_arg()
@@ -52,6 +63,8 @@ class CardParseOptions:
         copied_options.PARSED = self.PARSED
         copied_options.VERBOSE = self.VERBOSE
         copied_options.COLORS = self.COLORS
+        copied_options.USERS = self.USERS
+        copied_options.TIME = self.TIME
         copied_options.FORMATS = self.FORMATS
         copied_options.STATS = self.STATS
         copied_options.SET = self.SET
@@ -103,6 +116,36 @@ class CardParseOptions:
 
             if self.VERBOSE:
                 print(self.COLORS)
+
+    def _handle_user_group(self):
+        # Get the user group to use, if it exists
+        users_match = self.users_re.search(self.OPTIONS_STR)
+
+        if self.VERBOSE:
+            print(f"users_match: {users_match is not None}")
+
+        # If the flag is found,
+        if users_match:
+            self.PARSED = True
+            self.USERS = users_match.group(2).lower()
+
+            if self.VERBOSE:
+                print(self.USERS)
+
+    def _handle_time_period(self):
+        # Get the time period to use, if it exists
+        time_match = self.time_re.search(self.OPTIONS_STR)
+
+        if self.VERBOSE:
+            print(f"time_match: {time_match is not None}")
+
+        # If the flag is found,
+        if time_match:
+            self.PARSED = True
+            self.TIME = time_match.group(2).lower()
+
+            if self.VERBOSE:
+                print(self.time)
 
     def _handle_format_filter(self):
         # Get the list of formats to display stats for, if it exists.
@@ -178,7 +221,7 @@ class CardParseOptions:
         if '=' not in self.OPTIONS_STR:
             val = self.OPTIONS_STR.strip()
 
-            if val.upper() in SETS:
+            if val.upper() in ALL_17L_SETS:
                 self.PARSED = True
                 self.SET = val.upper()
                 if self.VERBOSE:
@@ -196,6 +239,18 @@ class CardParseOptions:
                 self.COLORS = [color_val]
                 if self.VERBOSE:
                     print(f"Setting COLORS to {self.COLORS}, from single_arg")
+
+            if val.lower() in ['top', 'middle', 'bottom']:
+                self.PARSED = True
+                self.USERS = val.lower()
+                if self.VERBOSE:
+                    print(f"Setting USERS to {self.USERS}, from single_arg")
+
+            if val.lower() in ['firstweek','notlastweek','lasttwoweeks','lastweek','lastday']:
+                self.PARSED = True
+                self.TIME = val.lower()
+                if self.VERBOSE:
+                    print(f"Setting TIME to {self.TIME}, from single_arg")
 
 
 class CardParseData:

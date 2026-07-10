@@ -16,6 +16,8 @@ FORMATS: dict[str, list[str]] = {
 
 FORMAT_MAPPINGS: dict[str, str] = {alias: name for name in FORMATS for alias in FORMATS[name]}
 
+TIME_MAPPING = {"firstweek": ("FIRST_WEEK", "First Week"), "notfirstweek": ("ALL_EXCEPT_FIRST_WEEK", "All Except First Week"), "lasttwoweeks": ("LAST_TWO_WEEKS", "Last Two Weeks"), "lastweek": ("LAST_WEEK", "Last Week"), "lastday": ("LAST_DAY", "Last Day")}
+
 DATA_COMMANDS: dict[str, list[tuple[str, str, bool]]] = {
     'alsa': [('seen_count', '# Seen', True), ('avg_seen', 'ALSA', False)],
     'ata': [('pick_count', '# Taken', True), ('avg_pick', 'ATA', False)],

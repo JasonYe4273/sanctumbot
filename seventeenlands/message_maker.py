@@ -4,7 +4,7 @@ import requests
 from datetime import date
 
 from seventeenlands.CardParseData import MessageParseData, CardParseData
-from seventeenlands.utils.settings import ALL_17L_SETS, SETS
+from seventeenlands.utils.settings import ALL_17L_SETS, SETS, TIME_MAPPING
 from seventeenlands.utils.consts import COMMAND_STR
 from seventeenlands.embed_maker import gen_card_embed, supported_color_strings, how_to_query_17lands
 from seventeenlands.DataCache import DataCache
@@ -89,15 +89,23 @@ async def send_card_call_response(card_call: CardParseData, channel) -> None:
     use_cache = True
     query_str = ''
 
-    if card_call.OPTIONS.COLORS:  # type: ignore[arg-type]
-        use_cache = False
-        query_str += f'&deck_color={colors}'
-
     if card_call.OPTIONS.SET not in SETS:
         use_cache = False
 
-    if not use_cache:
-        # Calculate 17lands query string
+    if card_call.OPTIONS.COLORS:  # type: ignore[arg-type]
+        use_cache = False
+        query_str += f'&deck_color={card_call.OPTIONS.COLORS}'
+
+    if card_call.OPTIONS.USERS:
+        use_cache = False
+        query_str += f'&user_group={card_call.OPTIONS.USERS}'
+
+    time_description = "All Time"
+    if card_call.OPTIONS.TIME:
+        use_cache = False
+        query_str += f'&time_period={TIME_MAPPING[card_call.OPTIONS.TIME][0]}'
+        time_description = TIME_MAPPING[card_call.OPTIONS.TIME][1]
+    else:
         query_str += f'&time_period=ALL_TIME'
 
     data_to_use = get_data_to_use(card_call.OPTIONS.SET,
@@ -111,8 +119,9 @@ async def send_card_call_response(card_call: CardParseData, channel) -> None:
             data=data_to_use,
             formats=card_call.OPTIONS.FORMATS,  # type: ignore[arg-type]
             fields=card_call.OPTIONS.STATS,  # type: ignore[arg-type]
-            time_period="All Time",
-            color_filter=(card_call.OPTIONS.COLORS if card_call.OPTIONS.COLORS else "None")
+            color_filter=(card_call.OPTIONS.COLORS if card_call.OPTIONS.COLORS else "None"),
+            time_period=time_description,
+            user_group=(card_call.OPTIONS.USERS if card_call.OPTIONS.USERS else "all")
         ))
     except Exception:
         msg_str = f"An error occurred trying to display data for `{card_call.CARD_DATA['name']}` in " \

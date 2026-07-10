@@ -41,7 +41,7 @@ def new_data_embed(title: str, description: str = "", url: str = "") -> discord.
 
 
 def gen_card_embed(card: dict, set_code: str, data: dict, formats: list[str], fields: list[str],
-                   time_period: str, color_filter: str = "None") -> discord.Embed:
+                   color_filter: str = "None", time_period: str = "All Time", user_group: str = "all") -> discord.Embed:
     """
     Returns an embed which displays the game stats about a particular card.
     :param card: The json of the card.
@@ -67,16 +67,16 @@ def gen_card_embed(card: dict, set_code: str, data: dict, formats: list[str], fi
     embed = new_data_embed(title, url=f"https://www.17lands.com/card_data/details?card_id={data[formats[0]][stored_name]['mtga_id']}&expansion={set_code}")
 
     # Generate a field to show the scope of the data.
-    time_period = f"Time Period: {time_period}" + '\r\n'
+    color_filter_emojis = Manamoji.emojify_color_string(color_filter)
+    if color_filter_emojis == "":
+        color_filter_emojis = "*None*"
+    color_filter_str = "Deck Color Filter: \t\t" + color_filter_emojis + '\r\n'
 
-    print(f"color_filter: {color_filter}")
-    filter_emojis = Manamoji.emojify_color_string(color_filter)
-    if filter_emojis == "":
-        filter_emojis = "*None*"
-    filter_str = "Deck color filter: \t\t" + filter_emojis + '\r\n'
-    # TODO: fetch color win_rate from 17lands
-    color_win_rate = ""  # "Avg. " + WUBRG.emojify_color_id(color_filter) + " Win Rate: \t" + "%00.00" + '\r\n'
-    embed.add_field(name="Data Info", value=time_period + filter_str + color_win_rate, inline=False)
+    time_period_str = f"Time Period: {time_period}" + '\r\n'
+
+    user_group_str = f"User Group: {user_group}" + '\r\n'
+
+    embed.add_field(name="Data Info", value=color_filter_str + time_period_str + user_group_str, inline=False)
 
     # Generate a field which acts as the labels for the data.
     # SET = WUBRG.get_emoji("ELD") # TODO: Find and add set emojis to the sever to use with WUBRG.py
