@@ -94,6 +94,9 @@ class CardParseOptions:
                 if c_id != FAILSAFE and c_id not in self.COLORS:
                     self.COLORS.append(c_id)
 
+            if self.VERBOSE:
+                print(self.COLORS)
+
     def _handle_format_filter(self):
         # Get the list of formats to display stats for, if it exists.
         format_match = self.format_re.search(self.OPTIONS_STR)
@@ -118,6 +121,9 @@ class CardParseOptions:
                     # And if it is a new item, add it to the list.
                     if format_name not in self.FORMATS:
                         self.FORMATS.append(format_name)
+
+            if self.VERBOSE:
+                print(self.FORMATS)
 
     def _handle_stats_filter(self):
         # Get the list of formats to display stats for, if it exists.
@@ -144,6 +150,9 @@ class CardParseOptions:
                     if stat_name not in self.STATS:
                         self.STATS.append(stat_name)
 
+            if self.VERBOSE:
+                print(self.STATS)
+
     def _handle_set_override(self):
         # Get the set to pull data from, if it exists.
         set_match = self.set_re.search(self.OPTIONS_STR)
@@ -154,6 +163,9 @@ class CardParseOptions:
         if set_match:
             self.PARSED = True
             self.SET = set_match.group(2).upper()
+
+        if self.VERBOSE:
+            print(self.SET)
 
     def _handle_single_arg(self):
         if '=' not in self.OPTIONS_STR:
