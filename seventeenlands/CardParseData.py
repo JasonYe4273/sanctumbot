@@ -29,7 +29,7 @@ class CardParseOptions:
 
     # This should happen once, and be a 3 character string of letters and numbers.
     # TODO: allow matching other set name lengths
-    set_re = re.compile(r'([Ss]et)=([a-zA-Z0-9]{3})', re.IGNORECASE)
+    set_re = re.compile(r'([Ss]et|-[Ss])=([a-zA-Z0-9]{3})', re.IGNORECASE)
 
     def __init__(self):
         self.OPTIONS_STR: str = ''

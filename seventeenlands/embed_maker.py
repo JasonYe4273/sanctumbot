@@ -141,11 +141,11 @@ def how_to_query_17lands() -> discord.Embed:
 Multiple cards may be queried at once; use spaces between card names to do so. If a card name has spaces, it must be enclosed by quotes. Capitalization and completeness are not necessary. (Example: {{"cut dow" MURDER "for the throa"}})
 
 All additional options specified must be separated by spaces. Options include:
-- **Set**: specify which set should be queried. Default is whatever Scryfall thinks is correct, which may differ from the set you are trying to query 17lands for.
-- **Format**: specify format(s) (bo1, bo3, etc) with a comma separated list preceded by `-f=`. Default is Bo1.
-- **Deck color filter**: filter by color(s) of deck by supplying a color combination preceded by `-c=`. Default is no filter.
-- **Time Periods**: filter by time period by using `-t=` or `-time=`. Default is "All Time". Valid options include: firstweek, notfirstweek, lastmonth, lastweek, lastday.
-- **User Groups**: filter by user group by using `-u=` or `-users=`. Default is "all". Valid options include: top, middle, bottom.
+- **Set**: specify which set should be queried with `-s=` or `set=`. Default is whatever Scryfall thinks is correct, which may differ from the set you are trying to query 17lands for.
+- **Format**: specify format(s) (bo1, bo3, etc) with a comma separated list preceded by `-f=` or `formats=`. Default is Bo1.
+- **Deck color filter**: filter by color(s) of deck by supplying a color combination preceded by `-c=` or `colors=`. Default is no filter.
+- **Time Periods**: filter by time period by using `-t=` or `time=`. Default is "All Time". Valid options include: firstweek, notfirstweek, lastmonth, lastweek, lastday.
+- **User Groups**: filter by user group by using `-u=` or `users=`. Default is "all". Valid options include: top, middle, bottom.
 """
     )
 
