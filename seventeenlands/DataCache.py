@@ -32,9 +32,6 @@ class DataCache:
 
     @classmethod
     def __class_getitem__(cls, set_code) -> dict:
+        if set_code not in cls.CACHE:
+            cls.CACHE[set_code] = {f: {} for f in FORMATS}
         return cls.CACHE[set_code]
-
-    @classmethod
-    def check_set(cls, s: str) -> None:
-        if s not in cls.CACHE:
-            cls.CACHE[s] = {f: {} for f in FORMATS}

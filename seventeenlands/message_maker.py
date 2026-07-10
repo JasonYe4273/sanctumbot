@@ -53,9 +53,6 @@ async def handle_command(message: str, channel):
 def get_data_to_use(set_code: str, formats: list[str], query_str: str, use_cache: bool) -> dict:
     data_to_use = dict()
     for f in formats:
-        # Make sure the set is at least initialized in the cache
-        DataCache.check_set(set_code)
-
         # Use data from the cache if possible
         if use_cache:
             data_to_use[f] = DataCache[set_code][f]  # type: ignore[misc]
