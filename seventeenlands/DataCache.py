@@ -35,5 +35,6 @@ class DataCache:
         return cls.CACHE[set_code]
 
     @classmethod
-    def init_set(cls, set: str) -> None:
-        cls.CACHE[s] = {f: {} for f in FORMATS}
+    def check_set(cls, s: str) -> None:
+        if s not in cls.CACHE:
+            cls.CACHE[s] = {f: {} for f in FORMATS}
