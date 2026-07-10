@@ -24,14 +24,18 @@ class CardParseOptions:
     # This should happen once, and be a 3 character string of letters and numbers.
     set_re = re.compile(r'([Ss]et)=([a-zA-Z0-9]{3})', re.IGNORECASE)
 
-    def __init__(self, options: str = ''):
-        self.OPTIONS_STR: str = options
-        self.PARSED: bool = self.OPTIONS_STR == ''
+    def __init__(self):
+        self.OPTIONS_STR: str = ''
+        self.PARSED: bool = True
         self.VERBOSE: bool = False
         self.COLORS: Optional[str] = None
         self.FORMATS: Optional[list[str]] = None
         self.STATS: Optional[list[str]] = None
         self.SET: Optional[str] = None
+
+    def load_options(self, options: str = ''):
+        self.OPTIONS_STR = options
+        self.PARSED = options == ''
 
         self._handle_verbose()
         self._handle_color_filter()
@@ -42,17 +46,16 @@ class CardParseOptions:
         if not self.PARSED:
             print(f"Could not parse options '{self.OPTIONS_STR}'!")
 
-    def __init__(self, options_str: str, parsed: bool, verbose: bool, colors: Optional[str], formats: Optional[list[str]], stats: Optional[list[str]], _set: Optional[str]):
-        self.OPTIONS_STR = options_str
-        self.PARSED = parsed
-        self.VERBOSE = verbose
-        self.COLORS = colors
-        self.FORMATS = formats
-        self.STATS = stats
-        self.SET = _set
-
     def copy(self):
-        return CardParseOptions(self.OPTIONS_STR, self.PARSED, self.VERBOSE, self.COLORS, self.FORMATS, self.STATS, self.SET)
+        copied_options = CardParseOptions()
+        copied_options.OPTIONS_STR = self.OPTIONS_STR
+        copied_options.PARSED = self.PARSED
+        copied_options.VERBOSE = self.VERBOSE
+        copied_options.COLORS = self.COLORS
+        copied_options.FORMATS = self.FORMATS
+        copied_options.STATS = self.STATS
+        copied_options.SET = self.SET
+        return copied_options
 
     @staticmethod
     def _parse_list_match(match_str: str):
@@ -230,7 +233,8 @@ class MessageParseData:
             self._options_text = options_match[1]
         else:
             self._options_text = ''
-        self.OPTIONS: CardParseOptions = CardParseOptions(self._options_text)
+        self.OPTIONS: CardParseOptions = CardParseOptions()
+        self.OPTIONS.load_options(self._options_text)
 
         self._card_name_list: list[str] = []
         self.CARDS: list[dict] = []
