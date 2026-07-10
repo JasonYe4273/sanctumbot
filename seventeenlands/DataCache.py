@@ -33,3 +33,7 @@ class DataCache:
     @classmethod
     def __class_getitem__(cls, set_code) -> dict:
         return cls.CACHE[set_code]
+
+    @classmethod
+    def init_set(cls, set: str) -> None:
+        cls.CACHE[s] = {f: {} for f in FORMATS}

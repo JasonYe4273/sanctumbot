@@ -54,6 +54,9 @@ def get_data_to_use(set_code: str, formats: list[str], query_str: str, use_cache
     data_to_use = dict()
     for f in formats:
         # Use data from the cache if possible
+        if set_code not in DataCache:
+            DataCache.init_set(set_code)
+
         if use_cache:
             data_to_use[f] = DataCache[set_code][f]  # type: ignore[misc]
         elif f'{f}{query_str}' in DataCache[set_code]:  # type: ignore[misc]
