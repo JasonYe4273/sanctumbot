@@ -97,7 +97,7 @@ class CardParseOptions:
             self.PARSED = True
             self.COLORS = ""
             color_upper = color_match.group(2).upper()
-            for c in "WUBRGMC":
+            for c in "WUBRG":
                 if c in color_upper:
                     self.COLORS += c
 

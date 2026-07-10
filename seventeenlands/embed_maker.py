@@ -73,7 +73,7 @@ def gen_card_embed(card: dict, set_code: str, data: dict, formats: list[str], fi
     filter_emojis = Manamoji.emojify_color_string(color_filter)
     if filter_emojis == "":
         filter_emojis = "*None*"
-    filter_str = "Colour filter: \t\t" + filter_emojis + '\r\n'
+    filter_str = "Deck color filter: \t\t" + filter_emojis + '\r\n'
     # TODO: fetch color win_rate from 17lands
     color_win_rate = ""  # "Avg. " + WUBRG.emojify_color_id(color_filter) + " Win Rate: \t" + "%00.00" + '\r\n'
     embed.add_field(name="Data Info", value=time_period + filter_str + color_win_rate, inline=False)

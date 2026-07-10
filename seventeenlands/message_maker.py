@@ -91,9 +91,7 @@ async def send_card_call_response(card_call: CardParseData, channel) -> None:
 
     if card_call.OPTIONS.COLORS:  # type: ignore[arg-type]
         use_cache = False
-        COLOR_MAP = {'W': 'w', 'U': 'u', 'B': 'b', 'R': 'r', 'G': 'g', 'M': 'multicolor', 'C': 'colorless'}
-        colors = [COLOR_MAP[c] for c in card_call.OPTIONS.COLORS]  # type: ignore[index]
-        query_str += f'&color={"~".join(colors)}'
+        query_str += f'&deck_color={colors}'
 
     if card_call.OPTIONS.SET not in SETS:
         use_cache = False
