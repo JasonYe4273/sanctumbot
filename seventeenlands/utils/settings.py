@@ -3,6 +3,7 @@ OLD_SETS: list[str] = ['SOS']
 SETS: list[str] = UPDATING_SETS + OLD_SETS
 DEFAULT_FORMAT: str = 'PremierDraft'
 
+ALL_17L_SETS = ["MSH", "SOS", "Y26SOS", "TMT", "ECL", "Y26ECL", "TLA", "OM1", "EOE", "FIN", "Y25EOE", "TDM", "Y25TDM", "DFT", "Y25DFT", "PIO", "FDN", "DSK", "Y25DSK", "BLB", "Y25BLB", "MH3", "OTJ", "Y24OTJ", "MKM", "Y24MKM", "WOE", "Y24WOE", "LCI", "Y24LCI", "LTR", "MOM", "MAT", "SIR", "ONE", "Y23ONE", "BRO", "Y23BRO", "DMU", "Y23DMU", "HBG", "SNC", "Y22SNC", "NEO", "DBL", "VOW", "RAVM", "MID", "AFR", "STX", "CORE", "KHM", "KLR", "ZNR", "AKR", "M21", "IKO", "THB", "ELD", "Ravnica", "M20", "WAR", "M19", "DOM", "RIX", "GRN", "RNA", "KTK", "XLN", "Cube - Powered", "Cube", "Chaos", "Remix - Artifacts"]
 
 FORMATS: dict[str, list[str]] = {
     'PremierDraft': ['bo1', 'premier', 'premierdraft'],

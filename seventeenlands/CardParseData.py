@@ -13,7 +13,7 @@ class CardParseOptions:
     verbose_re = re.compile(r'([Vv]erbose ?|-[Vv])', re.IGNORECASE)
 
     # This could happen more than once, and could be a comma separated list of colour aliases
-    color_re = re.compile(r'([Cc]olou?rs?|-[Cc])=([WUBRGwubrg, ]*(?: |$))', re.IGNORECASE)
+    color_re = re.compile(r'([Cc]olou?rs?|-[Cc])=([WUBRGMCwubrgmc, ]*(?: |$))', re.IGNORECASE)
 
     # This could happen more than once, and could be a comma separated list of format aliases
     format_re = re.compile(r'([Ff]ormats?|-[Ff])=([a-zA-Z0-9, ]*(?: |$))', re.IGNORECASE)
@@ -28,7 +28,7 @@ class CardParseOptions:
         self.OPTIONS_STR: str = options
         self.PARSED: bool = self.OPTIONS_STR == ''
         self.VERBOSE: bool = False
-        self.COLORS: Optional[list[str]] = None
+        self.COLORS: Optional[str] = None
         self.FORMATS: Optional[list[str]] = None
         self.STATS: Optional[list[str]] = None
         self.SET: Optional[str] = None
@@ -41,6 +41,18 @@ class CardParseOptions:
 
         if not self.PARSED:
             print(f"Could not parse options '{self.OPTIONS_STR}'!")
+
+    def __init__(self, options_str: str, parsed: bool, verbose: bool, colors: Optional[str], formats: Optional[list[str]], stats: Optional[list[str]], _set: Optional[str]):
+        self.OPTIONS_STR = options_str
+        self.PARSED = parsed
+        self.VERBOSE = verbose
+        self.COLORS = colors
+        self.FORMATS = formats
+        self.STATS = stats
+        self.SET = _set
+
+    def copy(self):
+        return CardParseOptions(self.OPTIONS_STR, self.PARSED, self.VERBOSE, self.COLORS, self.FORMATS, self.STATS, self.SET)
 
     @staticmethod
     def _parse_list_match(match_str: str):
@@ -80,19 +92,11 @@ class CardParseOptions:
         # If the flag is found,
         if color_match:
             self.PARSED = True
-            # Initialize a list for COLORS, and split the found values.
-            self.COLORS = list()
-            colors = self._parse_list_match(color_match.group(2))
-            if self.VERBOSE:
-                print(f"colors: {colors is not None}")
-
-            # For each value,
-            for c in colors:
-                # Clean the value,
-                c_id = get_color_identity(c)
-                # And if it is new and valid, append it to the list.
-                if c_id != FAILSAFE and c_id not in self.COLORS:
-                    self.COLORS.append(c_id)
+            self.COLORS = ""
+            color_upper = color_match.group(2).upper()
+            for c in "WUBRGMC":
+                if c in color_upper:
+                    self.COLORS += c
 
             if self.VERBOSE:
                 print(self.COLORS)
@@ -198,9 +202,6 @@ class CardParseData:
         self._fill_missing_options()
 
     def _fill_missing_options(self):
-        if not self.OPTIONS.COLORS:
-            self.OPTIONS.COLORS = [''] + get_color_supersets(''.join(self.CARD_DATA['color_identity']), 2)
-
         if not self.OPTIONS.FORMATS:
             # info['formats'] = settings.get_user_formats(username)
             self.OPTIONS.FORMATS = [DEFAULT_FORMAT]
@@ -258,7 +259,7 @@ class MessageParseData:
     def _gen_card_calls(self):
         # For each found card,
         for card in self.CARDS:
-            self.CARD_CALLS.append(CardParseData(card, CardParseOptions(self._options_text)))
+            self.CARD_CALLS.append(CardParseData(card, self.OPTIONS.copy()))
 
 
 if __name__ == "__main__":

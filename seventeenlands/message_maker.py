@@ -4,7 +4,7 @@ import requests
 from datetime import date
 
 from seventeenlands.CardParseData import MessageParseData, CardParseData
-from seventeenlands.utils.settings import SETS
+from seventeenlands.utils.settings import ALL_17L_SETS, SETS
 from seventeenlands.utils.consts import COMMAND_STR
 from seventeenlands.embed_maker import gen_card_embed, supported_color_strings, how_to_query_17lands
 from seventeenlands.DataCache import DataCache
@@ -79,43 +79,47 @@ def get_data_to_use(set_code: str, formats: list[str], query_str: str, use_cache
 
 
 async def send_card_call_response(card_call: CardParseData, channel) -> None:
+    if card_call.OPTIONS.SET not in ALL_17L_SETS:
+        msg_str = f"Data for `{card_call.OPTIONS.SET}` is not on 17lands. \n" \
+                  f"If requesting a card with multiple printings, you may need to specify which 17lands set to use."
+        await send_message(channel, msg_str)
+        return
+
     colors = None
     use_cache = True
     query_str = ''
 
-    if len(card_call.OPTIONS.COLORS) == 1:  # type: ignore[arg-type]
+    if card_call.OPTIONS.COLORS:  # type: ignore[arg-type]
         use_cache = False
-        colors = card_call.OPTIONS.COLORS[0]  # type: ignore[index]
+        COLOR_MAP = {'W': 'w', 'U': 'u', 'B': 'b', 'R': 'r', 'G': 'g', 'M': 'multicolor', 'C': 'colorless'}
+        colors = [COLOR_MAP[c] for c in card_call.OPTIONS.COLORS]  # type: ignore[index]
+        query_str += f'&color={"~".join(colors)}'
+
+    if card_call.OPTIONS.SET not in SETS:
+        use_cache = False
 
     if not use_cache:
         # Calculate 17lands query string
-        query_str = f'&time_period=ALL_TIME'
-        if colors:
-            query_str += f'&colors={colors}'
+        query_str += f'&time_period=ALL_TIME'
 
-    if card_call.OPTIONS.SET not in SETS:
-        msg_str = f"Data for `{card_call.OPTIONS.SET}` is not currently available.\n" \
-                  f"Please specify another set, or request that the data be added."
+    data_to_use = get_data_to_use(card_call.OPTIONS.SET,
+                                  card_call.OPTIONS.FORMATS,  # type: ignore[arg-type]
+                                  query_str,
+                                  use_cache)
+    try:
+        await send_embed_message(channel, gen_card_embed(
+            card=card_call.CARD_DATA,
+            set_code=card_call.OPTIONS.SET,
+            data=data_to_use,
+            formats=card_call.OPTIONS.FORMATS,  # type: ignore[arg-type]
+            fields=card_call.OPTIONS.STATS,  # type: ignore[arg-type]
+            time_period="All Time",
+            color_filter=(card_call.OPTIONS.COLORS if card_call.OPTIONS.COLORS else "None")
+        ))
+    except Exception:
+        msg_str = f"An error occurred trying to display data for `{card_call.CARD_DATA['name']}` in " \
+                  f"`{card_call.OPTIONS.SET}`."
         await send_message(channel, msg_str)
-    else:
-        data_to_use = get_data_to_use(card_call.OPTIONS.SET,
-                                      card_call.OPTIONS.FORMATS,  # type: ignore[arg-type]
-                                      query_str,
-                                      use_cache)
-        try:
-            await send_embed_message(channel, gen_card_embed(
-                card=card_call.CARD_DATA,
-                set_code=card_call.OPTIONS.SET,
-                data=data_to_use,
-                formats=card_call.OPTIONS.FORMATS,  # type: ignore[arg-type]
-                fields=card_call.OPTIONS.STATS,  # type: ignore[arg-type]
-                time_period="All Time",
-                color_filter=(colors if colors else "None")
-            ))
-        except Exception:
-            msg_str = f"An error occurred trying to display data for `{card_call.CARD_DATA['name']}` in " \
-                      f"`{card_call.OPTIONS.SET}`."
-            await send_message(channel, msg_str)
 
 
 async def handle_card_request_v2(message: str, channel) -> None:
