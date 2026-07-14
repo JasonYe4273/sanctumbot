@@ -52,6 +52,7 @@ class CardParseOptions:
         self._handle_time_period()
         self._handle_format_filter()
         self._handle_set_override()
+        self._handle_stats_filter()
         self._handle_single_arg()
 
         if not self.PARSED:
@@ -239,6 +240,12 @@ class CardParseOptions:
                 self.COLORS = color_val
                 if self.VERBOSE:
                     print(f"Setting COLORS to {self.COLORS}, from single_arg")
+
+            if val.lower() in STAT_ALIASES:
+                self.PARSED = True
+                self.STATS.append(STAT_ALIASES(val.lower()))
+                if self.VERBOSE:
+                    print(f"Setting STATS to {self.STATS}, from single_arg")
 
             if val.lower() in ['top', 'middle', 'bottom']:
                 self.PARSED = True
