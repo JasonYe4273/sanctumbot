@@ -83,8 +83,6 @@ def gen_card_embed(card: dict, set_code: str, data: dict, formats: list[str], fi
     formats_column = "\r\n".join([f'*{FORMAT_NICKNAMES[f]}*' for f in formats])
     embed.add_field(name=f" - {set_code} - ", value=formats_column, inline=True)
 
-    print(fields)
-
     # Generate a field which is populated with a 'table' of card data.
     format_string = "`{:^6}`"
     fields_strings = [format_string.format(STAT_ALIASES[f]) for f in fields]

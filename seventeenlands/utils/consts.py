@@ -34,7 +34,7 @@ STAT_FORMAT_STRINGS: dict[str, str] = {
     "IWD": "`{:5.2f}%`"
 }
 
-STAT_ALIASES: dict[str, str] = {
+STAT_VARIABLES: dict[str, str] = {
     # 17Lands variable mapping
     "name": "Name",
     "color": "Color",
@@ -54,7 +54,9 @@ STAT_ALIASES: dict[str, str] = {
     "never_drawn_game_count": "# GND",
     "never_drawn_win_rate": "GND WR",
     "drawn_improvement_win_rate": "IWD",
+}
 
+OTHER_STAT_ALIASES: dict[str, str] = {
     # 17Lands variable shorthand mapping
     "games": "# GP",
     "winrate": "GP WR",
@@ -65,21 +67,22 @@ STAT_ALIASES: dict[str, str] = {
     "drawn_improvement": "IWD",
 
     # Lowercase mapping
-    "# seen": "# Seen",
+    "#seen": "# Seen",
     "alsa": "ALSA",
-    "# picked": "# Picked",
+    "#picked": "# Picked",
     "ata": "ATA",
-    "# gp": "# GP",
-    "gp wr": "GP WR",
-    "# oh": "# OH",
-    "oh wr": "OH WR",
-    "# gd": "# GD",
-    "gd wr": "GD WR",
-    "# gih": "# GIH",
-    "gih wr": "GIH WR",
-    "# gnd": "# GND",
-    "gnd wr": "GND WR",
+    "#gp": "# GP",
+    "gpwr": "GP WR",
+    "#oh": "# OH",
+    "ohwr": "OH WR",
+    "#gd": "# GD",
+    "gdwr": "GD WR",
+    "#gih": "# GIH",
+    "gihwr": "GIH WR",
+    "#gnd": "# GND",
+    "gndwr": "GND WR",
     "iwd": "IWD",
+    "iih": "IWD",
 
     # Shorthand mapping
     "seen": "# Seen",
@@ -90,6 +93,10 @@ STAT_ALIASES: dict[str, str] = {
     "gih": "GIH WR",
     "gnd": "GND WR",
 }
+
+STAT_ALIASES = STAT_VARIABLES
+for a in OTHER_STAT_ALIASES:
+    STAT_ALIASES[a] = OTHER_STAT_ALIASES[a]
 
 
 DEFAULT_STATS: list[str] = ["avg_seen", "avg_pick", "win_rate", "opening_hand_win_rate", "drawn_win_rate",

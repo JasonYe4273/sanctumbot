@@ -3,9 +3,21 @@ import re
 from datetime import date, timedelta, datetime
 
 from seventeenlands.WUBRG import FAILSAFE, COLOR_COMBINATIONS, get_color_identity, get_color_supersets
-from seventeenlands.utils.consts import STAT_ALIASES, DEFAULT_STATS
+from seventeenlands.utils.consts import STAT_ALIASES, DEFAULT_STATS, STAT_VARIABLES, OTHER_STAT_ALIASES
 from seventeenlands.utils.settings import FORMAT_MAPPINGS, DEFAULT_FORMAT, SETS, ALL_17L_SETS
 from seventeenlands.utils.utils import query_scryfall
+
+
+
+def get_stat_variable_from_alias(alias: str):
+    if alias in STAT_VARIABLES:
+        return alias
+    if alias not in OTHER_STAT_ALIASES:
+        return None
+    for v in STAT_VARIABLES:
+        if STAT_VARIABLES[v] == OTHER_STAT_ALIASES[alias]:
+            return v
+    return None
 
 
 class CardParseOptions:
@@ -193,13 +205,10 @@ class CardParseOptions:
 
             # For each value,
             for s in stats:
-                stat_alias = s.lower()
+                stat_variable = get_stat_variable_from_alias(s.lower())
                 # If the alias is found in STAT_ALIASES get the name,
-                if stat_alias in STAT_ALIASES:
-                    stat_name = STAT_ALIASES[stat_alias]
-                    # And if it is a new item, add it to the list.
-                    if stat_name not in self.STATS:
-                        self.STATS.append(stat_name)
+                if stat_variable and stat_variable not in self.STATS:
+                    self.STATS.append(stat_variable)
 
             if self.VERBOSE:
                 print(self.STATS)
@@ -241,9 +250,10 @@ class CardParseOptions:
                 if self.VERBOSE:
                     print(f"Setting COLORS to {self.COLORS}, from single_arg")
 
-            if val.lower() in STAT_ALIASES:
+            stat_val = get_stat_variable_from_alias(val.lower())
+            if stat_val:
                 self.PARSED = True
-                self.STATS = [STAT_ALIASES(val.lower())]
+                self.STATS = [stat_val]
                 if self.VERBOSE:
                     print(f"Setting STATS to {self.STATS}, from single_arg")
 
