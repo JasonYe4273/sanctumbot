@@ -94,7 +94,9 @@ OTHER_STAT_ALIASES: dict[str, str] = {
     "gnd": "GND WR",
 }
 
-STAT_ALIASES = STAT_VARIABLES
+STAT_ALIASES: dict[str,str] = dict()
+for v in STAT_VARIABLES:
+    STAT_ALIASES[v] = STAT_VARIABLES[v]
 for a in OTHER_STAT_ALIASES:
     STAT_ALIASES[a] = OTHER_STAT_ALIASES[a]
 

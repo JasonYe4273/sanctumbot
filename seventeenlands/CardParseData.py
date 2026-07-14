@@ -197,17 +197,14 @@ class CardParseOptions:
 
         if stats_match:
             self.PARSED = True
-            # Initialize a list for FORMATS, and split the found values.
+            # Initialize a list for STATS, and split the found values.
             self.STATS = list()
             stats = self._parse_list_match(stats_match.group(2))
             if self.VERBOSE:
                 print(f"formats: {stats is not None}")
 
-            # For each value,
             for s in stats:
                 stat_variable = get_stat_variable_from_alias(s.lower())
-                print(stat_variable)
-                # If the alias is found in STAT_ALIASES get the name,
                 if stat_variable and stat_variable not in self.STATS:
                     self.STATS.append(stat_variable)
 
