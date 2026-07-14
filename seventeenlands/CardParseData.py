@@ -37,7 +37,7 @@ class CardParseOptions:
     format_re = re.compile(r'([Ff]ormats?|-[Ff])=([a-zA-Z0-9, ]*(?: |$))', re.IGNORECASE)
 
     # This could happen more than once, and could be a comma separated list of format aliases
-    stats_re = re.compile(r'([Ss]tats?|[Cc]olumns?)=([a-zA-Z0-9, ]*(?: |$))', re.IGNORECASE)
+    stats_re = re.compile(r'([Ss]tats?|[Cc]olumns?)=([a-zA-Z0-9, #_]*(?: |$))', re.IGNORECASE)
 
     # This should happen once, and be a 3 character string of letters and numbers.
     # TODO: allow matching other set name lengths
@@ -206,6 +206,7 @@ class CardParseOptions:
             # For each value,
             for s in stats:
                 stat_variable = get_stat_variable_from_alias(s.lower())
+                print(stat_variable)
                 # If the alias is found in STAT_ALIASES get the name,
                 if stat_variable and stat_variable not in self.STATS:
                     self.STATS.append(stat_variable)
