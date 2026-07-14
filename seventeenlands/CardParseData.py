@@ -243,7 +243,7 @@ class CardParseOptions:
 
             if val.lower() in STAT_ALIASES:
                 self.PARSED = True
-                self.STATS.append(STAT_ALIASES(val.lower()))
+                self.STATS = [STAT_ALIASES(val.lower())]
                 if self.VERBOSE:
                     print(f"Setting STATS to {self.STATS}, from single_arg")
 
