@@ -161,7 +161,7 @@ async def update_deck_names(server: int):
 
 
 
-def get_message_from_link(link: str) -> Optional[discord.Message]:
+async def get_message_from_link(link: str) -> Optional[discord.Message]:
     try:
         ids = link.split('/')
         cid = int(ids[-2])
@@ -185,7 +185,7 @@ async def edit_notes(interaction: discord.Interaction, link: str, player: str=""
 
     link = 'https://discord.com/channels/' + link.split('/channels/')[-1]
 
-    message = get_message_from_link(link)
+    message = await get_message_from_link(link)
     note = _get_one_db(f"SELECT message,player,opponent,deck1,deck2,winloss,recorded_at FROM notes WHERE message='{link}' AND server={interaction.guild_id}")
     if not note or not message:
         await send_error(interaction, "Could not find note")
@@ -238,7 +238,7 @@ async def delete_notes(interaction: discord.Interaction, link: str):
         await send_error(interaction, "Can't find server")
         return
 
-    message = get_message_from_link(link)
+    message = await get_message_from_link(link)
     note = _get_one_db(f"SELECT message,player,opponent,deck1,deck2,winloss,recorded_at FROM notes WHERE message='{link}' AND server={interaction.guild_id}")
     if not note or not message:
         await send_error(interaction, "Could not find note")
