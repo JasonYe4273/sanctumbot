@@ -7,7 +7,7 @@ from util import client, tree, send_error, TOKEN, ALL, MAGIC, MAGIC_IDS
 
 import misc
 import tournaments
-import mythicscraper
+# import mythicscraper
 import booster
 import notes
 import card_notes
@@ -69,12 +69,12 @@ async def on_reaction_add(reaction, user):
 
 
 
-@tasks.loop(minutes=5.0)
-async def scrape():
-    print("Checking for scrapers...")
-    scrapers = _get_all_db("SELECT setcode FROM scraperinfo")
-    for s in scrapers:
-        await mythicscraper.mythicscraper(client, s[0])
+# @tasks.loop(minutes=5.0)
+# async def scrape():
+#     print("Checking for scrapers...")
+#     scrapers = _get_all_db("SELECT setcode FROM scraperinfo")
+#     for s in scrapers:
+#         await mythicscraper.mythicscraper(client, s[0])
 
 
 @tasks.loop(hours=12)
