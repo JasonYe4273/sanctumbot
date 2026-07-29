@@ -93,7 +93,7 @@ async def on_ready():
     Manamoji.cache_manamojis(client)
     DataCache.fetch_data(OLD_SETS)
 
-    scrape.start()
+    # scrape.start()
     refresh_data.start()
 
     p1p1s = _get_all_db("SELECT setcode,channel,minutes FROM packtaskloop")
