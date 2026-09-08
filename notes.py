@@ -4,6 +4,7 @@ from typing import Optional
 
 import discord
 from discord import app_commands
+from discord.ext.commands import parameter
 
 from util import client, tree, send_error, send_long_msg, log_command, ALL, RIFTBOUND, RIFTBOUND_LEGENDS
 from database import _get_all_db, _get_one_db, _set_db
@@ -55,12 +56,17 @@ async def deck_name_autocomplete(interaction: discord.Interaction, current: str)
 @app_commands.check(log_command)
 @app_commands.autocomplete(deck1=deck_name_autocomplete)
 @app_commands.autocomplete(deck2=deck_name_autocomplete)
-async def notes(interaction: discord.Interaction, player: str, opponent: str, deck1: str, deck2: str, winloss: str):
+async def notes(
+    interaction: discord.Interaction,
+    player: str = parameter(description="Don't use a ping @ someone"), opponent: str = parameter(description="Don't use a ping @ someone"),
+    deck1: str, deck2: str,
+    shortsummary: str = parameter(description="A short summary of your takeaways; this could just be the record, or an important conclusion")
+):
     deck1 = deck1.lower()
     deck2 = deck2.lower()
 
     msg = f"""# Notes for {player} on {deck1} vs {opponent} on {deck2}:
-**RECORD**: {winloss} 
+**RECORD**: {shortsummary} 
 """
     await interaction.response.send_message(msg)
     resp = await interaction.original_response()
@@ -68,7 +74,7 @@ async def notes(interaction: discord.Interaction, player: str, opponent: str, de
 
     _set_db(
         f"""INSERT INTO notes (server, message, player, opponent, deck1, deck2, winloss, recorded_at) VALUES
-        ({interaction.guild_id}, '{url}', '{player}', '{opponent}', '{deck1}', '{deck2}', '{winloss}', {int(datetime.now().timestamp())})"""
+        ({interaction.guild_id}, '{url}', '{player}', '{opponent}', '{deck1}', '{deck2}', '{shortsummary}', {int(datetime.now().timestamp())})"""
     )
 
     if interaction.guild_id:
