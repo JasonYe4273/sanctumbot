@@ -59,7 +59,7 @@ async def deck_name_autocomplete(interaction: discord.Interaction, current: str)
 async def notes(
     interaction: discord.Interaction,
     player: str = parameter(description="Don't use a ping @ someone"), opponent: str = parameter(description="Don't use a ping @ someone"),
-    deck1: str, deck2: str,
+    deck1: str = parameter(description="Deck for 'player'"), deck2: str = parameter(description="Deck for 'opponent'"),
     shortsummary: str = parameter(description="A short summary of your takeaways; this could just be the record, or an important conclusion")
 ):
     deck1 = deck1.lower()
