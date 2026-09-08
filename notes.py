@@ -55,6 +55,8 @@ async def deck_name_autocomplete(interaction: discord.Interaction, current: str)
 @app_commands.check(log_command)
 @app_commands.autocomplete(deck1=deck_name_autocomplete)
 @app_commands.autocomplete(deck2=deck_name_autocomplete)
+@app_commands.describe(player="Do NOT use an @ ping")
+@app_commands.describe(opponent="Do NOT use an @ ping")
 @app_commands.describe(shortsummary="A short summary of your takeaways; this could just be the record, or an important conclusion")
 async def notes(interaction: discord.Interaction, player: str, opponent: str, deck1: str, deck2: str, shortsummary: str):
     deck1 = deck1.lower()
