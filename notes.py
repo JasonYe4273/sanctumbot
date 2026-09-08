@@ -4,7 +4,6 @@ from typing import Optional
 
 import discord
 from discord import app_commands
-from discord.ext.commands import parameter
 
 from util import client, tree, send_error, send_long_msg, log_command, ALL, RIFTBOUND, RIFTBOUND_LEGENDS
 from database import _get_all_db, _get_one_db, _set_db
@@ -56,12 +55,8 @@ async def deck_name_autocomplete(interaction: discord.Interaction, current: str)
 @app_commands.check(log_command)
 @app_commands.autocomplete(deck1=deck_name_autocomplete)
 @app_commands.autocomplete(deck2=deck_name_autocomplete)
-async def notes(
-    interaction: discord.Interaction,
-    player: str = parameter(description="Don't use a ping @ someone"), opponent: str = parameter(description="Don't use a ping @ someone"),
-    deck1: str = parameter(description="Deck for 'player'"), deck2: str = parameter(description="Deck for 'opponent'"),
-    shortsummary: str = parameter(description="A short summary of your takeaways; this could just be the record, or an important conclusion")
-):
+@app_commands.describe(shortsummary="A short summary of your takeaways; this could just be the record, or an important conclusion")
+async def notes(interaction: discord.Interaction, player: str, opponent: str, deck1: str, deck2: str, shortsummary: str):
     deck1 = deck1.lower()
     deck2 = deck2.lower()
 
