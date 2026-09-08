@@ -88,7 +88,10 @@ async def refresh_data() -> None:
 @client.event
 async def on_ready():
     for g in ALL:
-        await tree.sync(guild=g)
+        try:
+            await tree.sync(guild=g)
+        except:
+            print(f"ERROR syncing with {g}")
 
     Manamoji.cache_manamojis(client)
     DataCache.fetch_data(OLD_SETS)
