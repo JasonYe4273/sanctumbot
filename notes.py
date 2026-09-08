@@ -63,7 +63,7 @@ async def notes(interaction: discord.Interaction, player: str, opponent: str, de
     deck2 = deck2.lower()
 
     msg = f"""# Notes for {player} on {deck1} vs {opponent} on {deck2}:
-**RECORD**: {shortsummary} 
+**SUMMARY**: {shortsummary} 
 """
     await interaction.response.send_message(msg)
     resp = await interaction.original_response()
