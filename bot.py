@@ -7,7 +7,7 @@ from util import client, tree, send_error, TOKEN, ALL, MAGIC, MAGIC_IDS
 
 import misc
 import tournaments
-# import mythicscraper
+import mythicscraper
 import booster
 import notes
 import card_notes
