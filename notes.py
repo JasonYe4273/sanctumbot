@@ -68,6 +68,7 @@ async def notes(interaction: discord.Interaction, player: str, opponent: str, de
     await interaction.response.send_message(msg)
     resp = await interaction.original_response()
     url = resp.jump_url
+    print(shortsummary)
 
     _set_db(
         f"""INSERT INTO notes (server, message, player, opponent, deck1, deck2, winloss, recorded_at) VALUES
