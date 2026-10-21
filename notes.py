@@ -68,11 +68,35 @@ async def notes(interaction: discord.Interaction, player: str, opponent: str, de
     await interaction.response.send_message(msg)
     resp = await interaction.original_response()
     url = resp.jump_url
-    print(shortsummary)
 
     _set_db(
         "INSERT INTO notes (server, message, player, opponent, deck1, deck2, winloss, recorded_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
         (interaction.guild_id, url, player, opponent, deck1, deck2, shortsummary, int(datetime.now().timestamp()))
+    )
+
+    if interaction.guild_id:
+        await update_deck_names(interaction.guild_id)
+
+
+@tree.command(  # type: ignore[arg-type]
+    name="connect_notes",
+    description="Record Testing Notes WITHOUT a Header",
+    guilds=ALL
+)
+@app_commands.check(log_command)
+@app_commands.autocomplete(deck1=deck_name_autocomplete)
+@app_commands.autocomplete(deck2=deck_name_autocomplete)
+@app_commands.describe(player="Do NOT use an @ ping")
+@app_commands.describe(opponent="Do NOT use an @ ping")
+@app_commands.describe(shortsummary="A short summary of your takeaways; this could just be the record, or an important conclusion")
+@app_commands.describe(link="The message to link to")
+async def notes(interaction: discord.Interaction, player: str, opponent: str, deck1: str, deck2: str, shortsummary: str, link: str):
+    deck1 = deck1.lower()
+    deck2 = deck2.lower()
+
+    _set_db(
+        "INSERT INTO notes (server, message, player, opponent, deck1, deck2, winloss, recorded_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+        (interaction.guild_id, link, player, opponent, deck1, deck2, shortsummary, int(datetime.now().timestamp()))
     )
 
     if interaction.guild_id:
