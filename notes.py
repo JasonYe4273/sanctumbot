@@ -102,7 +102,7 @@ async def notes(interaction: discord.Interaction, player: str, opponent: str, de
     if interaction.guild_id:
         await update_deck_names(interaction.guild_id)
 
-    await interaction.response.send_message("Success!")
+    await interaction.response.send_message("Success!", ephemeral=True)
 
 
 @tree.command(  # type: ignore[arg-type]
