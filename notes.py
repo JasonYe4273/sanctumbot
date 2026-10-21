@@ -71,8 +71,8 @@ async def notes(interaction: discord.Interaction, player: str, opponent: str, de
     print(shortsummary)
 
     _set_db(
-        f"""INSERT INTO notes (server, message, player, opponent, deck1, deck2, winloss, recorded_at) VALUES
-        ({interaction.guild_id}, '{url}', '{player}', '{opponent}', '{deck1}', '{deck2}', '{shortsummary}', {int(datetime.now().timestamp())})"""
+        "INSERT INTO notes (server, message, player, opponent, deck1, deck2, winloss, recorded_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+        (interaction.guild_id, url, player, opponent, deck1, deck2, shortsummary, int(datetime.now().timestamp()))
     )
 
     if interaction.guild_id:
